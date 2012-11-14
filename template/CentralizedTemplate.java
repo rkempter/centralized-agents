@@ -2,6 +2,7 @@ package template;
 
 //the list of imports
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -25,6 +26,7 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedTemplate implements CentralizedBehavior {
 
+	private nextTask nT;
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
@@ -35,13 +37,24 @@ public class CentralizedTemplate implements CentralizedBehavior {
 
 		this.topology = topology;
 		this.distribution = distribution;
-		this.agent = agent;
+		this.agent = agent;		
+
 	}
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
+
+		nT= new nextTask(tasks, vehicles);
+		for(int i=0; i< vehicles.size(); i++){
+			System.out.println(nT.getPlanVehicle(vehicles.get(i)));
+			System.out.println(nT.getTimeVehicle(vehicles.get(i)));
+		}
+		//System.out.println(nT.getTimeM());
+		//System.out.println(nT.getVehicleM());
+
+
+
+		//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
 
 		Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
 
@@ -75,4 +88,15 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		}
 		return plan;
 	}
+
+	public void generateSTartNode(TaskSet tasks){
+		Iterator<Task> taskIterator= tasks.iterator();
+		while ( taskIterator.hasNext() ){
+			Task t= taskIterator.next() ;
+			System.out.println( t );
+		}
+
+	}
 }
+
+
