@@ -26,7 +26,7 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedTemplate implements CentralizedBehavior {
 
-	private nextTask nT;
+	private Initialization init;
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
@@ -44,10 +44,10 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 
-		nT= new nextTask(tasks, vehicles);
+		init= new Initialization(tasks, vehicles);
 		for(int i=0; i< vehicles.size(); i++){
-			System.out.println(nT.getPlanVehicle(vehicles.get(i)));
-			System.out.println(nT.getTimeVehicle(vehicles.get(i)));
+			System.out.println(init.getPlanVehicle(vehicles.get(i)));
+			System.out.println(init.getTimeVehicle(vehicles.get(i)));
 		}
 		//System.out.println(nT.getTimeM());
 		//System.out.println(nT.getVehicleM());
