@@ -107,15 +107,12 @@ public class localSearchNode {
 	 * @param vehicle
 	 */
 	private void removeTaskFromList(Integer hash, Vehicle vehicle) {
-		// First we need to remove the task A from the line
 		ArrayList<Object> next = taskOrder.getValue(hash);
-		Integer time = timeArray.getValue(hash);
-
 		Integer previousKey = getPreviousHash(hash);
-		ArrayList<Object> previous = taskOrder.getValue(previousKey);
 		
 		taskOrder.addKeyValue(previousKey, next);
 		taskOrder.addKeyValue(hash, null);
+		
 		printStates(vehicle);
 	}
 	
@@ -162,6 +159,14 @@ public class localSearchNode {
 		return (task.toString() + taskAction).hashCode();
 	}
 	
+	/**
+	 * Returns hash of a taskObject given a time and a vehicle
+	 * @TODO: Vehicle list is wrong, the first tasks (0, 1, 2, ...) are missing
+	 * 
+	 * @param time
+	 * @param vehicle
+	 * @return
+	 */
 	private Integer getTaskByTimeAndVehicle(Integer time, Vehicle vehicle) {
 		System.out.println("Time: "+time);
 		ArrayList<Integer> tasks = timeArray.getTaskSameTime(time);
@@ -178,20 +183,12 @@ public class localSearchNode {
 		return null;
 	}
 	
-	private ArrayList<Object> getPreviousValue(Integer hash) {
-		System.out.println("Hash "+hash);
-		Integer time = timeArray.getValue(hash);
-		Vehicle vehicle = vehicleArray.getValue(hash);
-		Integer newHash;
-		if(time > 1) {
-			newHash = getTaskByTimeAndVehicle(time-1, vehicle);
-		} else {
-			newHash = vehicle.id();
-		}
-		
-		return taskOrder.getValue(newHash);
-	}
-	
+	/**
+	 * Returns the hash key of the previous taskObject in the chain
+	 * 
+	 * @param hash
+	 * @return previous hash
+	 */
 	private Integer getPreviousHash(Integer hash) {
 		System.out.println("Hash "+hash);
 		Integer time = timeArray.getValue(hash);
