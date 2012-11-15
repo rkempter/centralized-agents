@@ -32,6 +32,7 @@ public class Initialization {
 		for(int i=0; i< vehicleList.size(); i++){
 			System.out.println("vehicle:"+ vehicleList.get(i).id());
 			int currentVehicleCapacity= vehicleList.get(i).capacity();
+			timeM.addKeyValue(vehicleList.get(i).id(), 0);
 			int time= 1;
 
 			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity){	
@@ -97,6 +98,7 @@ public class Initialization {
 		
 		while(nT.getValue(key)!= null){
 			if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
+				System.out.println("test");
 				vehiclePlan.add((Task)nT.getValue(key).get(0));
 				key= (nT.getValue(key).get(0).toString()+ actionStates.DELIVER).hashCode();
 			}
