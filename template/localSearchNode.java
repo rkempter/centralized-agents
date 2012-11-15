@@ -173,7 +173,7 @@ public class localSearchNode {
 		System.out.println("Task list for that time: "+tasks);
 		for(int i = 0; i < tasks.size(); i++) {
 			Integer hash = tasks.get(i);
-			
+			//@TODO: Here it is not working
 			if(vehicleArray.getValue(hash) == vehicle) {
 				System.out.println("vehicle: "+vehicle.id());
 				return hash;
