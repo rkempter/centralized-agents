@@ -24,8 +24,13 @@ public class timeClass {
 	 * @param time
 	 * @return tasks
 	 */
-	public ArrayList<ArrayList<Object>> getTasks(Integer time) {
-		return null;
+	public ArrayList<Integer> getTaskSameTime(Integer time) {
+		ArrayList<Integer> keys= new ArrayList<Integer>();
+		for (Map.Entry<Integer, Integer> entry : timeM.entrySet()){
+			if(entry.getValue().equals(time)){
+				keys.add(entry.getKey());
+			}
+		}
+		return keys;
 	}
-	
 }
