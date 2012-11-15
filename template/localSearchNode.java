@@ -45,25 +45,29 @@ public class localSearchNode {
 	 * @param taskCar2
 	 * @return
 	 */
-	private localSearchNode ChangingVehicle(ArrayList<Object> taskCarA, ArrayList<Object> taskCarB, Vehicle vehicleA, Vehicle vehicleB) {
+	private localSearchNode ChangingVehicle(Vehicle vehicleA, Vehicle vehicleB) {
 		localSearchNode changeVehicleNode = null;
-		Task taskA = (Task) taskCarA.get(0);
-		Task taskB = (Task) taskCarB.get(0);
 		
-		Integer taskAPickUpHash = (taskA.toString() + actionStates.PICKUP).hashCode();
-		Integer taskADeliverHash = (taskA.toString() + actionStates.DELIVER).hashCode();
-		Integer taskBPickUpHash = (taskB.toString() + actionStates.PICKUP).hashCode();
-		Integer taskBDeliverHash = (taskB.toString() + actionStates.DELIVER).hashCode();
+		// THINK OF HASH COLLISIONS!!!!!!!!!!
 		
-		int taskWeightA = taskA.weight;
-		int taskWeightB = taskB.weight;
+		// We put taskObject from vehicle A to vehicle B
 		
-		int positionBInA = getPositionByCapacity(vehicleA, taskWeightA); // time at which we have to place task B
-		int positionAInB = getPositionByCapacity(vehicleB, taskWeightB); // time at which we have to place task A
+		ArrayList<Object> firstTaskPickUpA = taskOrder.getValue(vehicleA.id());
+		Task task = (Task) firstTaskPickUpA.get(0);
+		ArrayList<Object> firstTaskDeliverA = new ArrayList<Object>();
+		firstTaskDeliverA.set(0, task);
+		firstTaskDeliverA.set(1, actionStates.DELIVER);
 		
-		if(positionBInA != -1 && positionAInB != -1) {
+		Integer deliverTaskHash = (task.toString() + actionStates.DELIVER).hashCode();
+
+		removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
+		removeTaskFromList(deliverTaskHash, vehicleA);
 		
-		}
+		// Put delivery task at beginning (time 1)
+		addTaskToList(firstTaskDeliverA, vehicleB, 1);
+		
+		// Put task at beginning (time 1)
+		addTaskToList(firstTaskPickUpA, vehicleB, 1);
 		
 		
 		// We have to exchange Pickup and delivery!!!!!!
@@ -89,9 +93,10 @@ public class localSearchNode {
 		// First we need to remove the task A from the line A
 		ArrayList<Object> next = taskOrder.getValue(hash);
 		Integer time = timeArray.getValue(hash);
-		ArrayList<Object> previous = getTaskByTimeAndVehicle(time-1, vehicle);
+		ArrayList<Object> previous = getPreviousValue(hash);
 		Integer previousKey = createHash(previous);
 		taskOrder.addKeyValue(previousKey, next);
+		taskOrder.addKeyValue(hash, null);
 	}
 	
 	/**
@@ -102,13 +107,19 @@ public class localSearchNode {
 	 * @param time
 	 */
 	private void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
-		ArrayList<Object> taskAtPosition = getTaskByTimeAndVehicle(time, vehicle);
-		ArrayList<Object> previousTask = getTaskByTimeAndVehicle(time-1, vehicle);
+		ArrayList<Object> taskAtPosition = taskOrder.getValue(getTaskByTimeAndVehicle(time, vehicle));
+		Integer previousKey = null;
+		
+		if(time > 1) {
+			ArrayList<Object> previousTask = getPreviousValue(createHash(taskObject));
+			previousKey = createHash(previousTask);
+		} else {
+			previousKey = vehicle.id();
+		}
 		
 		Integer key = createHash(taskObject);
 		taskOrder.addKeyValue(key, taskAtPosition);
-		
-		Integer previousKey = createHash(previousTask);
+			
 		taskOrder.addKeyValue(previousKey, taskObject);
 	}
 	
@@ -125,19 +136,25 @@ public class localSearchNode {
 		return (task.toString() + taskAction).hashCode();
 	}
 	
-	private ArrayList<Object> getTaskByTimeAndVehicle(Integer time, Vehicle vehicle) {
-		ArrayList<ArrayList<Object>> tasks = timeArray.getTasks(time);
+	private Integer getTaskByTimeAndVehicle(Integer time, Vehicle vehicle) {
+		ArrayList<Integer> tasks = timeArray.getTaskSameTime(time);
 		for(int i = 0; i < tasks.size(); i++) {
-			Task task = (Task) tasks.get(i).get(0);
-			Object action = tasks.get(i).get(1);
-			Integer hash = (task.toString()+action).hashCode();
+			Integer hash = tasks.get(i);
 			
 			if(vehicleArray.getValue(hash) == vehicle) {
-				return tasks.get(i);
+				return hash;
 			} 
 		}
 		
 		return null;
+	}
+	
+	private ArrayList<Object> getPreviousValue(Integer hash) {
+		Integer time = timeArray.getValue(hash);
+		Vehicle vehicle = vehicleArray.getValue(hash);
+		Integer newHash = getTaskByTimeAndVehicle(time-1, vehicle);
+		return taskOrder.getValue(newHash);
+		
 	}
 	
 	private int getPositionByCapacity(Vehicle vehicleB, int taskWeightB) {
@@ -172,7 +189,7 @@ public class localSearchNode {
 		
 		// return best assignement
 		
-		return localSearchNode;
+		return maxNode;
 		
 		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)
 	}
