@@ -1,4 +1,5 @@
-//for nextT map the keys are: for task+ action = (task.toString()+ "P (or D)").hashCode(). for vehicle the key is vehicle.id() (because the object vehicle does change)
+//for nextT map the keys are: for task+ action = (task.toString()+ "P (or D)").hashCode(). 
+//for vehicle the key is vehicle.id() (because the object vehicle does change)
 
 package template;
 
@@ -14,9 +15,9 @@ import logist.task.TaskSet;
 
 public class nextTask {
 
-	private Map<Object,ArrayList<Object>> nextT=new HashMap<Object, ArrayList<Object>>();
-	private Map<Object,Integer> timeM=new HashMap<Object, Integer>();
-	private Map<Object,Vehicle> vehicleM=new HashMap<Object, Vehicle>();
+	private Map<Object,ArrayList<Object>> nextT = new HashMap<Object, ArrayList<Object>>();
+	private Map<Object,Integer> timeM = new HashMap<Object, Integer>();
+	private Map<Object,Vehicle> vehicleM =new HashMap<Object, Vehicle>();
 
 	public nextTask(TaskSet taskDist, List<Vehicle> vehicleList){
 		String[] actions= {"P", "D"};
@@ -28,8 +29,8 @@ public class nextTask {
 			TaskSet.add(taskIter.next());
 		//
 		int t_idx= 0;
-		Vehicle lastVehicle= null;
-		Integer lastKey= null;
+		Vehicle lastVehicle = null;
+		Integer lastKey = null;
 
 		for(int i=0; i< vehicleList.size(); i++){
 			System.out.println("vehicle:"+ vehicleList.get(i).id());
@@ -42,22 +43,22 @@ public class nextTask {
 				if(!nextT.containsKey(vehicleList.get(i).id())){
 					ArrayList<Object> firstTaskAction= new ArrayList<Object>();
 					firstTaskAction.add(TaskSet.get(t_idx));
-					firstTaskAction.add("P");
+					firstTaskAction.add(actionStates.PICKUP);
 					nextT.put(vehicleList.get(i).id(), firstTaskAction);
 				}
 				//updating the previous entry in nextT
 				if(lastVehicle!= null && !lastKey.equals(null)  && vehicleList.get(i).equals(lastVehicle)){
 					ArrayList<Object> taskAction= new ArrayList<Object>();
 					taskAction.add(TaskSet.get(t_idx));
-					taskAction.add("P");
+					taskAction.add(actionStates.PICKUP);
 					nextT.put(lastKey, taskAction);
 				}				
 				currentVehicleCapacity-= TaskSet.get(t_idx).weight;
 				for(int j=0; j< actions.length; j++){
-					if(actions[j].equalsIgnoreCase("P")){
+					if(actions[j].equals(actionStates.PICKUP)){
 						ArrayList<Object> taskAction= new ArrayList<Object>();
 						taskAction.add(TaskSet.get(t_idx));
-						taskAction.add("D");
+						taskAction.add(actionStates.DELIVER);
 						//System.out.println("adding link:"+ TaskSet.get(t_idx).toString()+ actions[j]+" to " + taskAction);
 						nextT.put((TaskSet.get(t_idx).toString()+ actions[j]).hashCode(), taskAction);
 					}
@@ -81,8 +82,21 @@ public class nextTask {
 		System.out.println(nextT);
 	}
 
-	public Map<Object, ArrayList<Object>> getNextT() {
-		return nextT;
+	/**
+	 * By converting current Task into a Hashcode and use
+	 * as the key, we find the next task
+	 * 
+	 * @param task
+	 * @return next
+	 */
+	public ArrayList<Object> getNextT(ArrayList<Object> task) {
+		Task taskElement = (Task) task.get(0);
+		Object action = task.get(1);
+		Integer key = (taskElement.toString() + action).hashCode();
+		
+		ArrayList<Object> next = nextT.get(key);
+		
+		return next;
 	}
 
 	public Map<Object, Integer> getTimeM() {
@@ -97,19 +111,23 @@ public class nextTask {
 		ArrayList<Task> vehiclePlan= new ArrayList<Task>();			//when get the plan test with .isEmpty() not with .equals(null)
 		int key= v.id();
 
-		while(nextT.get(key)!= null){
-			if(((String)nextT.get(key).get(1)).equals("P")){		//in the plan just need to save one of the two action. It matters the task
+		while(nextT.get(key) != null){
+			if(((String)nextT.get(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
 				vehiclePlan.add((Task)nextT.get(key).get(0));
-				key= (nextT.get(key).get(0).toString()+ "D").hashCode();
+				key= (nextT.get(key).get(0).toString()+ actionStates.DELIVER).hashCode();
 			}
 		}
 		return vehiclePlan;
 	}
+	
+	
+	
+	
 	//just  a debug function to make sure everything works
 	public ArrayList<Integer> getTimeVehicle(Vehicle v){
 		ArrayList<Integer> timeV= new ArrayList<Integer>();
 
-		ArrayList<Object> startValue= nextT.get(v.id());
+		ArrayList<Object> startValue = nextT.get(v.id());
 		if(startValue!=null){
 			//generate key from value
 			int key= (((Task)startValue.get(0)).toString()+ (String)startValue.get(1)).hashCode();
@@ -126,7 +144,7 @@ public class nextTask {
 		return timeV;
 	}
 
-
+	
 
 
 }
