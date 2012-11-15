@@ -36,6 +36,10 @@ public class nextTask {
 	public void addKeyValue(int key, ArrayList<Object> value){
 		nextT.put(key, value);
 	}
+	
+	public void printState() {
+		System.out.println(nextT);
+	}
 }
 
 

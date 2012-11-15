@@ -15,9 +15,9 @@ public class Initialization {
 	
 	public Initialization(TaskSet taskDist, List<Vehicle> vehicleList){
 		actionStates[] actions= {actionStates.PICKUP, actionStates.DELIVER};
-		nT= new nextTask();
-		timeM= new timeClass();
-		vehicleM= new vehicleClass();		
+		nT = new nextTask();
+		timeM = new timeClass();
+		vehicleM = new vehicleClass();		
 
 		//copy iterator to List because can not go back and forth on an iterator!!!
 		Iterator<Task> taskIter= taskDist.iterator();
@@ -76,9 +76,21 @@ public class Initialization {
 				nT.addKeyValue(vehicleList.get(i).id(), null);
 			}
 		}
-		System.out.println(nT.getNextTask());
+		//System.out.println(nT.getNextTask());
+	}
+	
+	public nextTask getNextTask() {
+		return nT;
+	}
+	
+	public timeClass getTimeArray() {
+		return timeM;
 	}
 
+	public vehicleClass getVehicleArray() {
+		return vehicleM;
+	}
+	
 	public ArrayList<Task> getPlanVehicle(Vehicle v){
 		ArrayList<Task> vehiclePlan= new ArrayList<Task>();			//when get the plan test with .isEmpty() not with .equals(null)
 		int key= v.id();

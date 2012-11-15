@@ -15,8 +15,10 @@ public class localSearchNode {
 	
 	// CapacityArray
 
-	public localSearchNode(nextTask _taskOrder) {
+	public localSearchNode(nextTask _taskOrder, timeClass _timeArray, vehicleClass _vehicleArray) {
 		taskOrder = _taskOrder;
+		timeArray = _timeArray;
+		vehicleArray = _vehicleArray;
 	}
 	
 	public static void SelectInititialSolution() {
@@ -45,8 +47,10 @@ public class localSearchNode {
 	 * @param taskCar2
 	 * @return
 	 */
-	private localSearchNode ChangingVehicle(Vehicle vehicleA, Vehicle vehicleB) {
+	public void changingVehicle(Vehicle vehicleA, Vehicle vehicleB) {
 		localSearchNode changeVehicleNode = null;
+		
+		taskOrder.printState();
 		
 		// THINK OF HASH COLLISIONS!!!!!!!!!!
 		
@@ -54,9 +58,10 @@ public class localSearchNode {
 		
 		ArrayList<Object> firstTaskPickUpA = taskOrder.getValue(vehicleA.id());
 		Task task = (Task) firstTaskPickUpA.get(0);
+		System.out.println("Create new");
 		ArrayList<Object> firstTaskDeliverA = new ArrayList<Object>();
-		firstTaskDeliverA.set(0, task);
-		firstTaskDeliverA.set(1, actionStates.DELIVER);
+		firstTaskDeliverA.add(task);
+		firstTaskDeliverA.add(actionStates.DELIVER);
 		
 		Integer deliverTaskHash = (task.toString() + actionStates.DELIVER).hashCode();
 
@@ -70,6 +75,10 @@ public class localSearchNode {
 		addTaskToList(firstTaskPickUpA, vehicleB, 1);
 		
 		
+		
+		
+		
+		
 		// We have to exchange Pickup and delivery!!!!!!
 		
 		// Change exchange tasks at specific keys.
@@ -80,7 +89,6 @@ public class localSearchNode {
 		
 		// Check capacity constraints
 		
-		return changeVehicleNode;
 	}
 	
 	/**
@@ -130,6 +138,7 @@ public class localSearchNode {
 	 * @return hash
 	 */
 	private Integer createHash(ArrayList<Object> taskObject) {
+		System.out.println("we want hash of this "+taskObject);
 		Task task = (Task) taskObject.get(0);
 		Object taskAction = taskObject.get(1);
 		
@@ -152,9 +161,14 @@ public class localSearchNode {
 	private ArrayList<Object> getPreviousValue(Integer hash) {
 		Integer time = timeArray.getValue(hash);
 		Vehicle vehicle = vehicleArray.getValue(hash);
-		Integer newHash = getTaskByTimeAndVehicle(time-1, vehicle);
-		return taskOrder.getValue(newHash);
+		Integer newHash;
+		if(time > 1) {
+			newHash = getTaskByTimeAndVehicle(time-1, vehicle);
+		} else {
+			newHash = vehicle.id();
+		}
 		
+		return taskOrder.getValue(newHash);
 	}
 	
 	private int getPositionByCapacity(Vehicle vehicleB, int taskWeightB) {
