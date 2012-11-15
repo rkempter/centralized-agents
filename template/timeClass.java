@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class timeClass {
-	private Map<Object,Integer> timeM = new HashMap<Object, Integer>();
+	private Map<Integer,Integer> timeM = new HashMap<Integer, Integer>();
 	
 	public timeClass(){
 	}
