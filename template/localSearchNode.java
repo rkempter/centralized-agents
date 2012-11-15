@@ -10,8 +10,8 @@ import logist.task.Task;
 public class localSearchNode {
 	
 	private nextTask taskOrder;
-	private Map<Object, Integer> timeArray = new HashMap<Object, Integer>();
-	private Map<Object, Vehicle> vehicleArray = new HashMap<Object, Vehicle>();
+	private timeClass timeArray;
+	private vehicleClass vehicleArray;
 	
 	// CapacityArray
 
@@ -62,25 +62,7 @@ public class localSearchNode {
 		int positionAInB = getPositionByCapacity(vehicleB, taskWeightB); // time at which we have to place task A
 		
 		if(positionBInA != -1 && positionAInB != -1) {
-			// First we need to remove the task A from the line A
-			ArrayList<Object> nextAPickup = taskOrder.getNextTaskByHash(taskAPickUpHash);
-			ArrayList<Object> nextADeliver = taskOrder.getNextTaskByHash(taskBPickUpHash);
-			
-			Integer timeAPickUp = timeArray.getTimeByHash(taskAPickUpHash);
-			Integer timeADeliver = timeArray.getTimeByHash(TaskADeliverHash);
-			
-			ArrayList<Object> previousAPickUp = getTaskByTimeAndVehicle(timeAPickUp-1, vehicleA);
-			ArrayList<Object> previousADeliver = getTaskByTimeAndVehicle(timeADeliver-1, vehicleA);
-			
-			previousAPickUp.set(1, nextAPickup);
-			previousADeliver.set(1, nextADeliver);
-			
-			
-			// DO IT FOR A
-			ArrayList<Object> taskBeforePickUpA = nextTask.getTaskByTimeAndVehicle()
-			// Set task and adjust keys
-			// Exchange tasks in vehicles
-			// Update time in time
+		
 		}
 		
 		
@@ -97,6 +79,52 @@ public class localSearchNode {
 		return changeVehicleNode;
 	}
 	
+	/**
+	 * Removes a taskObject from a vehicle and updates the keys
+	 * 
+	 * @param hash
+	 * @param vehicle
+	 */
+	private void removeTaskFromList(Integer hash, Vehicle vehicle) {
+		// First we need to remove the task A from the line A
+		ArrayList<Object> next = taskOrder.getValue(hash);
+		Integer time = timeArray.getValue(hash);
+		ArrayList<Object> previous = getTaskByTimeAndVehicle(time-1, vehicle);
+		Integer previousKey = createHash(previous);
+		taskOrder.addKeyValue(previousKey, next);
+	}
+	
+	/**
+	 * Adds an taskElement to a vehicle and updates the keys
+	 * 
+	 * @param task
+	 * @param vehicle
+	 * @param time
+	 */
+	private void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
+		ArrayList<Object> taskAtPosition = getTaskByTimeAndVehicle(time, vehicle);
+		ArrayList<Object> previousTask = getTaskByTimeAndVehicle(time-1, vehicle);
+		
+		Integer key = createHash(taskObject);
+		taskOrder.addKeyValue(key, taskAtPosition);
+		
+		Integer previousKey = createHash(previousTask);
+		taskOrder.addKeyValue(previousKey, taskObject);
+	}
+	
+	/**
+	 * Creates the Hash value of a taskObject
+	 * 
+	 * @param taskObject
+	 * @return hash
+	 */
+	private Integer createHash(ArrayList<Object> taskObject) {
+		Task task = (Task) taskObject.get(0);
+		Object taskAction = taskObject.get(1);
+		
+		return (task.toString() + taskAction).hashCode();
+	}
+	
 	private ArrayList<Object> getTaskByTimeAndVehicle(Integer time, Vehicle vehicle) {
 		ArrayList<ArrayList<Object>> tasks = timeArray.getTasks(time);
 		for(int i = 0; i < tasks.size(); i++) {
@@ -104,7 +132,7 @@ public class localSearchNode {
 			Object action = tasks.get(i).get(1);
 			Integer hash = (task.toString()+action).hashCode();
 			
-			if(vehicleArray.get(hash) == vehicle) {
+			if(vehicleArray.getValue(hash) == vehicle) {
 				return tasks.get(i);
 			} 
 		}
