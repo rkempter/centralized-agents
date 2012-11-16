@@ -111,7 +111,6 @@ public class Initialization {
 
 		while(nT.getValue(key)!= null){
 			//if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
-			//if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
 			vehiclePlan.add((Task)nT.getValue(key).get(0));
 			key= (nT.getValue(key).get(0).toString()+ (actionStates)nT.getValue(key).get(1)).hashCode();
 			//}

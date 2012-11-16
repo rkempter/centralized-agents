@@ -17,8 +17,10 @@ public class localSearchNode {
 	private timeClass timeArray;
 	private vehicleClass vehicleArray;
 	private capacityClass capacities;
+
 	private List<Vehicle> vehicleList;
 	private enum currentAction {REMOVE, ADD }
+
 
 	// CapacityArray
 
@@ -134,12 +136,16 @@ public class localSearchNode {
 			System.out.println(getPlanVehicle(vehicleB));
 
 			System.out.println("@@@@@@@@@@@@@@");
+			capacities.printCapacities();
 
+			
 			// Put delivery task at beginning (time 0)
 			addTaskToList(firstTaskDeliverA, vehicleB, 0);
 
 			// Put task at beginning (time 0)
 			addTaskToList(firstTaskPickUpA, vehicleB, 0);
+			capacities.printCapacities();
+
 			//System.out.println()
 
 			System.out.println("@@@@@@@@@@@@@@");
@@ -221,7 +227,7 @@ public class localSearchNode {
 		taskOrder.addKeyValue(hash, null);			//inconsistent need to be updated in addTask
 		
 		System.out.println(currentRemovedTask);
-		capacities.updateCapacitiesAfterRemove(vehicle, timeArray.getValue(createHash(currentRemovedTask)), (actionStates)currentRemovedTask.get(1));
+		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
 	}
 
@@ -247,6 +253,7 @@ public class localSearchNode {
 
 		taskOrder.addKeyValue(previousKey, taskObject);
 		updateTimes(taskObject, currentAction.ADD, vehicle);
+		capacities.updateCapacitiesAfterUpdate(vehicle, time, currentAction.ADD, ((Task)taskObject.get(0)).weight);
 	}
 
 	/**
