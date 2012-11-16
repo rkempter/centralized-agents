@@ -43,29 +43,32 @@ public class CentralizedTemplate implements CentralizedBehavior {
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		
+
 
 
 		init = new Initialization(tasks, vehicles);
 		System.out.println("Before: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
+		System.out.println(init.getPlanVehicle(vehicles.get(1)));
+		
+		System.out.println("*****");
 		nextTask nt = init.getNextTask();
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
-		
-		localSearchNode node = new localSearchNode(nt, tc, vc);
-		
+		capacityClass cc= init.getCapacities();
+
+		localSearchNode node = new localSearchNode(nt, tc, vc, cc);
+
 		node.changingVehicle(vehicles.get(0), vehicles.get(1));
 		System.out.println("After: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
-		
-		
-//		for(int i=0; i< vehicles.size(); i++){
-//			System.out.println(init.getPlanVehicle(vehicles.get(i)));
-//			System.out.println(init.getTimeVehicle(vehicles.get(i)));
-//		}
-//		System.out.println(nT.getTimeM());
-//		System.out.println(nT.getVehicleM());
+		System.out.println(init.getPlanVehicle(vehicles.get(1)));
+
+
+
+
+		//		System.out.println(nT.getTimeM());
+		//		System.out.println(nT.getVehicleM());
 
 
 

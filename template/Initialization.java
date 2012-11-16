@@ -12,12 +12,15 @@ public class Initialization {
 	private nextTask nT;
 	private timeClass timeM;
 	private vehicleClass vehicleM;
+	private capacityClass capacitiesC;
 	
 	public Initialization(TaskSet taskDist, List<Vehicle> vehicleList){
 		actionStates[] actions= {actionStates.PICKUP, actionStates.DELIVER};
 		nT = new nextTask();
 		timeM = new timeClass();
-		vehicleM = new vehicleClass();		
+		vehicleM = new vehicleClass();
+		capacitiesC= new capacityClass(vehicleList);
+		
 
 		//copy iterator to List because can not go back and forth on an iterator!!!
 		Iterator<Task> taskIter= taskDist.iterator();
@@ -32,7 +35,7 @@ public class Initialization {
 		for(int i=0; i< vehicleList.size(); i++){
 			System.out.println("vehicle:"+ vehicleList.get(i).id());
 			int currentVehicleCapacity= vehicleList.get(i).capacity();
-			int time= 1;
+			int time= 0;
 
 			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity){	
 				System.out.println("adding task: "+ TaskSet.get(t_idx)+ " to vehicle "+ vehicleList.get(i).id());
@@ -49,10 +52,11 @@ public class Initialization {
 					taskAction.add(TaskSet.get(t_idx));
 					taskAction.add(actionStates.PICKUP);
 					nT.addKeyValue(lastKey, taskAction);
-				}				
-				currentVehicleCapacity-= TaskSet.get(t_idx).weight;
+				}
+				//currentVehicleCapacity-= TaskSet.get(t_idx).weight;
 				for(int j=0; j< actions.length; j++){
 					if(actions[j].equals(actionStates.PICKUP)){
+						currentVehicleCapacity-= TaskSet.get(t_idx).weight;
 						ArrayList<Object> taskAction= new ArrayList<Object>();
 						taskAction.add(TaskSet.get(t_idx));
 						taskAction.add(actionStates.DELIVER);
@@ -60,10 +64,15 @@ public class Initialization {
 						nT.addKeyValue((TaskSet.get(t_idx).toString()+ actions[j]).hashCode(), taskAction);
 					}
 					else{
+						currentVehicleCapacity+= TaskSet.get(t_idx).weight;
 						lastKey= (TaskSet.get(t_idx).toString()+ actions[j]).hashCode();		//save key to retrieve it on the next loop
 						nT.addKeyValue(lastKey, null);
 					}
+					//updating capacities
+					capacitiesC.addCapacitySequentially(vehicleList.get(i).id(), currentVehicleCapacity);
+					
 					//adding entry in timeM
+					//System.out.println("adding task "+ TaskSet.get(t_idx)+ " at time "+ time);
 					timeM.addKeyValue((TaskSet.get(t_idx).toString()+ actions[j]).hashCode(), time);
 					time++;
 					//adding entry in vehicleM
@@ -76,6 +85,7 @@ public class Initialization {
 				nT.addKeyValue(vehicleList.get(i).id(), null);
 			}
 		}
+		capacitiesC.printCapacities();
 		//System.out.println(nT.getNextTask());
 	}
 	
@@ -90,16 +100,19 @@ public class Initialization {
 	public vehicleClass getVehicleArray() {
 		return vehicleM;
 	}
+	public capacityClass getCapacities(){
+		return capacitiesC;
+	}
 	
 	public ArrayList<Task> getPlanVehicle(Vehicle v){
 		ArrayList<Task> vehiclePlan= new ArrayList<Task>();			//when get the plan test with .isEmpty() not with .equals(null)
 		int key= v.id();
 		
 		while(nT.getValue(key)!= null){
-			if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
+			//if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
 				vehiclePlan.add((Task)nT.getValue(key).get(0));
-				key= (nT.getValue(key).get(0).toString()+ actionStates.DELIVER).hashCode();
-			}
+				key= (nT.getValue(key).get(0).toString()+ (actionStates)nT.getValue(key).get(1)).hashCode();
+			//}
 		}
 		return vehiclePlan;
 	}
