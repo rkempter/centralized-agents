@@ -229,6 +229,59 @@ public class localSearchNode {
 	private boolean checkCapacity(Integer t, Vehicle v) {
 		return true;
 	}
+	
+	/**
+	 * Checks if the time constraints are held given to tasks
+	 * 
+	 * @param taskAObject
+	 * @param taskBObject
+	 * @return boolean
+	 */
+	private boolean checkTimeConstraint(ArrayList<Object> taskAObject, ArrayList<Object> taskBObject) {
+		actionStates complementActionA = getComplementaryAction((actionStates) taskAObject.get(1));
+		actionStates complementActionB = getComplementaryAction((actionStates) taskBObject.get(1));
+
+		Integer hashAReal = createHash(taskAObject);
+		Integer hashBReal = createHash(taskBObject);
+		Integer hashACheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionA));
+		Integer hashBCheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionB));
+		
+		if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.DELIVER)) {
+			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
+				return true;
+			}
+		} else if(taskAObject.get(1).equals(actionStates.DELIVER) && taskBObject.get(1).equals(actionStates.DELIVER)) {
+			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
+				return true;
+			}
+		} else if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.PICKUP)) {
+			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
+				return true;
+			}
+		} else {
+			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private ArrayList<Object> createTaskObject(Task task, actionStates action) {
+		ArrayList<Object> taskObject = new ArrayList<Object>();
+		taskObject.add(task);
+		taskObject.add(action);
+		
+		return taskObject;
+	}
+	
+	private actionStates getComplementaryAction(actionStates action) {
+		if(action == actionStates.DELIVER) {
+			return actionStates.PICKUP;
+		} else {
+			return actionStates.DELIVER;
+		}
+	}
 
 	/**
 	 * update time for remove and add . AAA: in remove set temporarily the time of the removed element to -1 (illegal value)

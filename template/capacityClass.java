@@ -28,6 +28,7 @@ public class capacityClass {
 			return null;
 		}
 	}
+	
 	public void setCapacityAtTime(int vehicleId, int time, int newCapacity){
 		if(capacities.get(vehicleId).size()>=time){
 			capacities.get(vehicleId).set(time, newCapacity);
