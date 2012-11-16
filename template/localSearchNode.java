@@ -115,6 +115,42 @@ public class localSearchNode {
 		// Check capacity constraints
 
 	}
+	
+	/**
+	 * Exchange two tasks
+	 * 
+	 * @param taskObjectA
+	 * @param taskObjectB
+	 */
+	
+	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
+		// check time constraint
+		Integer taskObjectAHash = createHash(taskObjectA);
+		Integer taskObjectBHash = createHash(taskObjectB);
+		Vehicle vehicle = vehicleArray.getValue(taskObjectAHash);
+		Integer timeA = timeArray.getValue(taskObjectAHash);
+		Integer timeB = timeArray.getValue(taskObjectBHash);
+		
+		if(vehicleArray.getValue(taskObjectAHash) != vehicleArray.getValue(taskObjectBHash)) {
+			return null;
+		}
+		
+		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
+			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities);
+			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
+			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
+			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
+			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
+			
+//			if(!newSolution.checkOverallCapacity(vehicle)) {
+//				return null;
+//			}
+			
+			return newSolution;
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Removes a taskObject from a vehicle and updates the keys
@@ -122,7 +158,7 @@ public class localSearchNode {
 	 * @param hash
 	 * @param vehicle
 	 */
-	private void removeTaskFromList(Integer hash, Vehicle vehicle) {
+	public void removeTaskFromList(Integer hash, Vehicle vehicle) {
 		// First we need to remove the task A from the plan A
 		ArrayList<Object> next = taskOrder.getValue(hash);
 
@@ -143,7 +179,7 @@ public class localSearchNode {
 	 * @param vehicle
 	 * @param time
 	 */
-	private void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
+	public void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
 		ArrayList<Object> taskAtPosition = taskOrder.getValue(vehicle.id());
 		Integer previousKey = null;
 
@@ -267,6 +303,13 @@ public class localSearchNode {
 		return false;
 	}
 	
+	/**
+	 * Creates a taskObject based on a task and an action
+	 * 
+	 * @param task
+	 * @param action
+	 * @return ArrayList<Object>
+	 */
 	private ArrayList<Object> createTaskObject(Task task, actionStates action) {
 		ArrayList<Object> taskObject = new ArrayList<Object>();
 		taskObject.add(task);
@@ -275,6 +318,11 @@ public class localSearchNode {
 		return taskObject;
 	}
 	
+	/**
+	 * Returns the contrary action
+	 * @param action
+	 * @return actionStates
+	 */
 	private actionStates getComplementaryAction(actionStates action) {
 		if(action == actionStates.DELIVER) {
 			return actionStates.PICKUP;
