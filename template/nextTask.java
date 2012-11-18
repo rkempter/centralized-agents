@@ -21,7 +21,6 @@ public class nextTask {
 		}
 	}
 	
-	
 	/**
 	 * By converting current Task into a Hashcode and use
 	 * as the key, we find the next task

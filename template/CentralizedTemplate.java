@@ -54,11 +54,17 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
 		capacityClass cc= init.getCapacities();
-		int iterationNbr = 1000;
+		int iterationNbr = 50;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
+		
 		while(iterationNbr > 0) {
 			node = node.chooseNeighbours();
+			System.out.println("--------------");
+			System.out.println(node.getCost());
+			for(int i = 0; i < vehicles.size(); i++) {
+				System.out.println(node.getPlanVehicle(vehicles.get(i)));
+			}
 			iterationNbr--;
 		}
 		
@@ -67,7 +73,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		for(int i = 0; i < vehicles.size(); i++) {
 			System.out.println(node.getPlanVehicle(vehicles.get(i)));
 		}
-
 
 		Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
 
