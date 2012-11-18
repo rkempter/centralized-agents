@@ -458,6 +458,13 @@ public class localSearchNode {
 		}
 	}
 	
+	/**
+	 * Chooses the best neighbour. Uses stochastic hill climbing in case there is no neighbour
+	 * with heigher costs than the current solution.
+	 * 
+	 * @param neighbours
+	 * @return bestNode
+	 */
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
 		localSearchNode bestNode = null;
 		long bestCost = 0;
@@ -471,9 +478,40 @@ public class localSearchNode {
 			}
 		}
 		
+		// Stochastic Hill Climbing
+		if(bestNode.getCost() < this.getCost()) {
+			if(randomChoice()) {
+				return bestNode;
+			} else {
+				return this;
+			}
+		}
+		
 		return bestNode;
 	}
 
+	/**
+	 * Simulation of stochastic process
+	 * 
+	 * @return true / false
+	 */
+	private boolean randomChoice() {
+		Random generator = new Random();
+		int number = generator.nextInt(10) + 1;
+		int threshold = 4; // 0.4 probabilty of changing
+		
+		if(number <= threshold) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Computes the cost of the current solution
+	 * 
+	 * @return
+	 */
 	public long getCost() {
 		long totalCost = 0;
 				
