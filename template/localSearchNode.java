@@ -87,8 +87,7 @@ public class localSearchNode {
 	 */
 
 	public localSearchNode changingVehicle(ArrayList<Object> taskObject, Vehicle vehicleA, Vehicle vehicleB) {
-
-
+		
 		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
 		// We put taskObject from vehicle A to vehicle B
@@ -109,16 +108,16 @@ public class localSearchNode {
 			newSolution.capacities.printCapacities();
 			System.out.println("Time for tasks of vehicle "+ vehicleA.id()+ " is "+ newSolution.getTimeOfPlan(vehicleA));
 			System.out.println("Time for tasks of vehicle "+ vehicleB.id()+ " is "+ newSolution.getTimeOfPlan(vehicleB));
-
 			
+			System.out.println("++++++++++ "+ deliverTaskHash+ " "+ createHash(firstTaskPickUpA));
 			newSolution.removeTaskFromList(deliverTaskHash, vehicleA);
 			newSolution.removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
 
 			// Put delivery task at beginning (time 0)
 			newSolution.addTaskToList(firstTaskDeliverA, vehicleB, 0);
-
 			// Put task at beginning (time 0)
 			newSolution.addTaskToList(firstTaskPickUpA, vehicleB, 0);
+			updateVehicleArray(createHash(firstTaskDeliverA), createHash(firstTaskPickUpA), vehicleB);
 			newSolution.capacities.printCapacities();
 			
 			System.out.println("plan of vehicle after changing"+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
@@ -133,6 +132,10 @@ public class localSearchNode {
 			System.out.println("vehicleA has an empty plan!!");
 		}
 		return newSolution;
+	}
+	private void updateVehicleArray(Integer hashFirstTaskDeliverA, Integer hashFirstTaskPickUpA, Vehicle newV){
+		vehicleArray.addKeyValue(hashFirstTaskDeliverA, newV);
+		vehicleArray.addKeyValue(hashFirstTaskPickUpA, newV);
 	}
 
 	private nextTask getTaskOrder() {
@@ -182,6 +185,7 @@ public class localSearchNode {
 			}
 			System.out.println("After changing order: ");
 			System.out.println(newSolution.getPlanVehicle(vehicle));
+			System.out.println("Time for tasks of vehicle "+ vehicle.id()+ " is "+ newSolution.getTimeOfPlan(vehicle));
 			System.out.println("------------");
 
 			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
@@ -220,7 +224,7 @@ public class localSearchNode {
 		taskOrder.addKeyValue(previousKey, next);		//update previous entry
 		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
 
-		System.out.println("removing task:"+ currentRemovedTask);
+		System.out.println("removing task: "+ currentRemovedTask);
 		System.out.println("plan is: "+ getPlanVehicle(vehicle));
 		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
