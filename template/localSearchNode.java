@@ -44,7 +44,9 @@ public class localSearchNode {
 			for(int j = i+1; j < length; j++) {
 				ArrayList<Object> taskObjectA = getTaskByTimeAndVehicle(i, choosenVehicle);
 				ArrayList<Object> taskObjectB = getTaskByTimeAndVehicle(j, choosenVehicle);
-
+				if(taskObjectA == null || taskObjectB == null) {
+					continue;
+				}
 				localSearchNode newSolution = changeTaskOrder(taskObjectA, taskObjectB);
 				if(newSolution != null) {
 					neighbours.add(newSolution);
@@ -152,6 +154,8 @@ public class localSearchNode {
 
 	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
 		// check time constraint
+		System.out.println("TaskObjectA: "+taskObjectA);
+		System.out.println("TaskObjectB: "+taskObjectB);
 		Integer taskObjectAHash = createHash(taskObjectA);
 		Integer taskObjectBHash = createHash(taskObjectB);
 		Vehicle vehicle = vehicleArray.getValue(taskObjectAHash);
