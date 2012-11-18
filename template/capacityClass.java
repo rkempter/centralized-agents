@@ -1,6 +1,7 @@
 package template;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import logist.simulation.Vehicle;
@@ -66,6 +67,21 @@ public class capacityClass {
 				capacities.get(v.id()).set(i, capacities.get(v.id()).get(i-1)-oldWeight);
 			}
 		}
+	}
+	/**
+	 * check if capacity drops below zero.
+	 * @param v
+	 * @return return true if the capacity drops below zero
+	 */
+	public boolean checkIfBelowZero(Vehicle v){
+		boolean belowZero= false;
+		Iterator<Integer> capcityIt= capacities.get(v.id()).iterator();
+		while(capcityIt.hasNext() && !belowZero){
+			if(capcityIt.next()< 0){
+				belowZero= true;
+			}
+		}
+		return belowZero;
 	}
 
 	public void printCapacities(){

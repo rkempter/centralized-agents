@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.rits.cloning.Cloner;
+
 import logist.simulation.Vehicle;
 import logist.task.Task;
 
@@ -17,10 +19,10 @@ public class localSearchNode {
 	private timeClass timeArray;
 	private vehicleClass vehicleArray;
 	private capacityClass capacities;
-
 	private List<Vehicle> vehicleList;
+	
+	private Cloner cloner;
 
-	// CapacityArray
 
 	public localSearchNode(nextTask _taskOrder, timeClass _timeArray, vehicleClass _vehicleArray, capacityClass cc, List<Vehicle> _vehicleList) {
 		taskOrder = _taskOrder;
@@ -28,19 +30,13 @@ public class localSearchNode {
 		vehicleArray = _vehicleArray;
 		capacities= cc;
 		vehicleList = _vehicleList;
-	}
-
-	public static void SelectInititialSolution() {
-		// Create nextTask array
-		// Create time array
-		// Create vehicule array
-		// Create capacity array
+		
+		cloner = new Cloner();
 	}
 
 	public localSearchNode chooseNeighbours() {
 		Random generator = new Random();
 		int vehicleId = generator.nextInt(vehicleList.size());
-		// @Todo check if car!!!
 		Vehicle choosenVehicle = vehicleList.get(vehicleId);
 
 		ArrayList<localSearchNode> neighbours = new ArrayList<localSearchNode>();
@@ -48,8 +44,7 @@ public class localSearchNode {
 		// Change vehicle
 		for(int i = 0; i < vehicleList.size(); i++) {
 			if(i != vehicleId) {
-				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);		//get first task
-				// Capacity
+				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);				
 				neighbours.add(changingVehicle(taskObject, choosenVehicle, vehicleList.get(i)));
 			}
 		}
@@ -98,18 +93,11 @@ public class localSearchNode {
 	 * @param taskCar2
 	 * @return
 	 */
-	
+
 	public localSearchNode changingVehicle(ArrayList<Object> taskObject, Vehicle vehicleA, Vehicle vehicleB) {
-//	public localSearchNode changingVehicle() {
-//
-//		//just for testing
-//		Vehicle vehicleA= vehicleList.get(0);
-//		Vehicle vehicleB= vehicleList.get(1);
 
 
-
-		// Fuck java clone stuff
-		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
+		localSearchNode newSolution = cloner.deepClone(this);
 
 		taskOrder.printState();
 
@@ -187,20 +175,31 @@ public class localSearchNode {
 		}
 
 		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
-			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
+			localSearchNode newSolution = cloner.deepClone(this);
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
 			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
 			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
 
-			//			if(!newSolution.checkOverallCapacity(vehicle)) {
-			//				return null;
-			//			}
+			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
+				return null;
+			}
 
 			return newSolution;
 		}
 
 		return null;
+	}
+	/**
+	 * check if capacity never drops below zero
+	 * @param newSolution, v
+	 * @return return true if the capacity never drops below zero
+	 */
+	public boolean checkOverallCapacity(localSearchNode newSolution, Vehicle v){
+		if(newSolution.capacities.checkIfBelowZero(v))
+			return false;
+		else
+			return true;
 	}
 
 	/**
@@ -215,8 +214,8 @@ public class localSearchNode {
 
 		int previousKey = getPreviousKey(hash);
 		ArrayList<Object> currentRemovedTask= taskOrder.getValue(previousKey);
-		taskOrder.addKeyValue(previousKey, next);	//update previous entry
-		taskOrder.addKeyValue(hash, null);			//inconsistent need to be updated in addTask
+		taskOrder.addKeyValue(previousKey, next);		//update previous entry
+		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
 
 		System.out.println(currentRemovedTask);
 		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
@@ -332,10 +331,6 @@ public class localSearchNode {
 		// Adjust time array
 		// Adjust capacity array
 		return taskOrderNode;
-	}
-
-	private boolean checkCapacity(Integer t, Vehicle v) {
-		return true;
 	}
 
 	/**

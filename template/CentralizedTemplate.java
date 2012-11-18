@@ -50,7 +50,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		System.out.println("Before: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
 		System.out.println(init.getPlanVehicle(vehicles.get(1)));
-		
+
 		System.out.println("*****");
 		nextTask nt = init.getNextTask();
 		timeClass tc = init.getTimeArray();
@@ -58,8 +58,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		capacityClass cc= init.getCapacities();
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-
-//		node.changingVehicle(vehicles.get(0), vehicles.get(1));
+		//node.changingVehicle();
+		//node.changingVehicle(vehicles.get(0), vehicles.get(1));
 		System.out.println("After: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
 		System.out.println(init.getPlanVehicle(vehicles.get(1)));
