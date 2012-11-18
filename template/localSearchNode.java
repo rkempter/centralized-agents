@@ -92,14 +92,14 @@ public class localSearchNode {
 		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
 		// We put taskObject from vehicle A to vehicle B
-		if(newSolution.taskOrder.getValue(vehicleA.id())!= null){
-			ArrayList<Object> firstTaskPickUpA = newSolution.taskOrder.getValue(vehicleA.id());
+		if(newSolution.getTaskOrder().getValue(vehicleA.id())!= null){
+			ArrayList<Object> firstTaskPickUpA = newSolution.getTaskOrder().getValue(vehicleA.id());
 			Task task = (Task) firstTaskPickUpA.get(0);
 
 			ArrayList<Object> firstTaskDeliverA = new ArrayList<Object>();
 			firstTaskDeliverA.add(task);
 			firstTaskDeliverA.add(actionStates.DELIVER);
-
+			
 			Integer deliverTaskHash = (task.toString() + actionStates.DELIVER).hashCode();
 			
 			//print out the plan before we change vehicles
@@ -135,6 +135,10 @@ public class localSearchNode {
 		return newSolution;
 	}
 
+	private nextTask getTaskOrder() {
+		return taskOrder;
+	}
+
 	/**
 	 * Exchange two tasks
 	 * 
@@ -144,8 +148,8 @@ public class localSearchNode {
 
 	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
 		// check time constraint
-//		System.out.println("TaskObjectA: "+taskObjectA);
-//		System.out.println("TaskObjectB: "+taskObjectB);
+
+		
 		Integer taskObjectAHash = createHash(taskObjectA);
 		Integer taskObjectBHash = createHash(taskObjectB);
 		Vehicle vehicle = vehicleArray.getValue(taskObjectAHash);
@@ -157,11 +161,20 @@ public class localSearchNode {
 		}
 
 		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
+			System.out.println("-------------");
+			System.out.println("TaskObjectA: "+taskObjectA);
+			System.out.println("TaskObjectB: "+taskObjectB);
+			System.out.println("Time A: "+timeA);
+			System.out.println("Time B: "+timeB);
 			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
+			System.out.println("Before changing order: ");
+			System.out.println(newSolution.getPlanVehicle(vehicle));
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
 			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
 			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
+			System.out.println("After changing order: ");
+			System.out.println(newSolution.getPlanVehicle(vehicle));
 
 			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
 				return null;
@@ -214,8 +227,9 @@ public class localSearchNode {
 	public void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
 		ArrayList<Object> taskAtPosition = taskOrder.getValue(vehicle.id());
 		Integer previousKey = null;
+		System.out.println("Time in addTaskToList: "+time);
 
-		if(time > 0) {			//never enters here because append to the head of the plan.
+		if(time > 0) {
 			previousKey = getPreviousKey(createHash(taskObject));
 		} else {
 			previousKey = vehicle.id();
