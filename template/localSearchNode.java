@@ -175,6 +175,7 @@ public class localSearchNode {
 			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
 			System.out.println("After changing order: ");
 			System.out.println(newSolution.getPlanVehicle(vehicle));
+			System.out.println("------------");
 
 			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
 				return null;
@@ -321,28 +322,36 @@ public class localSearchNode {
 	 * @return boolean
 	 */
 	private boolean checkTimeConstraint(ArrayList<Object> taskAObject, ArrayList<Object> taskBObject) {
+		if(taskAObject.get(0).equals(taskBObject.get(0))) {
+			return false;
+		}
 		actionStates complementActionA = getComplementaryAction((actionStates) taskAObject.get(1));
 		actionStates complementActionB = getComplementaryAction((actionStates) taskBObject.get(1));
 
 		Integer hashAReal = createHash(taskAObject);
 		Integer hashBReal = createHash(taskBObject);
 		Integer hashACheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionA));
-		Integer hashBCheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionB));
+		Integer hashBCheck = createHash(createTaskObject((Task) taskBObject.get(0), complementActionB));
+		System.out.println("Time A Real: "+timeArray.getValue(hashAReal)+" "+taskAObject.get(1));
+		System.out.println("Time B Real: "+timeArray.getValue(hashBReal)+" "+taskBObject.get(1));
+		System.out.println("Time A Checker: "+timeArray.getValue(hashACheck)+" "+complementActionA);
+		System.out.println("Time B Checker: "+timeArray.getValue(hashBCheck)+" "+complementActionB);
 
 		if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.DELIVER)) {
-			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
+			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
+				
 				return true;
 			}
 		} else if(taskAObject.get(1).equals(actionStates.DELIVER) && taskBObject.get(1).equals(actionStates.DELIVER)) {
-			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
+			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
 				return true;
 			}
 		} else if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.PICKUP)) {
-			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
+			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
 				return true;
 			}
 		} else {
-			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
+			if(timeArray.getValue(hashBCheck) > timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
 				return true;
 			}
 		}
@@ -526,13 +535,13 @@ public class localSearchNode {
 		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)
 	}
 
-	public ArrayList<Task> getPlanVehicle(Vehicle v){
-		ArrayList<Task> vehiclePlan= new ArrayList<Task>();			//when get the plan test with .isEmpty() not with .equals(null)
+	public ArrayList<ArrayList<Object>> getPlanVehicle(Vehicle v){
+		ArrayList<ArrayList<Object>> vehiclePlan= new ArrayList<ArrayList<Object>>();			//when get the plan test with .isEmpty() not with .equals(null)
 		int key= v.id();
 
 		while(taskOrder.getValue(key)!= null){
 			//if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
-			vehiclePlan.add((Task)taskOrder.getValue(key).get(0));
+			vehiclePlan.add(taskOrder.getValue(key));
 			key= (taskOrder.getValue(key).get(0).toString()+ (actionStates)taskOrder.getValue(key).get(1)).hashCode();
 			//}
 		}
