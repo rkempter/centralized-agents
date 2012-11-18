@@ -169,10 +169,17 @@ public class localSearchNode {
 			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 			System.out.println("Before changing order: ");
 			System.out.println(newSolution.getPlanVehicle(vehicle));
+			
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
-			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
-			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
+			if(timeB< timeA){
+				newSolution.addTaskToList(taskObjectA, vehicle, timeB);
+				newSolution.addTaskToList(taskObjectB, vehicle, timeA);
+			}
+			else{
+				newSolution.addTaskToList(taskObjectB, vehicle, timeA);
+				newSolution.addTaskToList(taskObjectA, vehicle, timeB);
+			}
 			System.out.println("After changing order: ");
 			System.out.println(newSolution.getPlanVehicle(vehicle));
 			System.out.println("------------");
@@ -213,9 +220,12 @@ public class localSearchNode {
 		taskOrder.addKeyValue(previousKey, next);		//update previous entry
 		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
 
-		System.out.println(currentRemovedTask);
+		System.out.println("removing task:"+ currentRemovedTask);
+		System.out.println("plan is: "+ getPlanVehicle(vehicle));
 		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
+		System.out.println("time is: "+ getTimeOfPlan(vehicle));
+
 	}
 
 	/**
@@ -226,20 +236,21 @@ public class localSearchNode {
 	 * @param time
 	 */
 	public void addTaskToList(ArrayList<Object> taskObject, Vehicle vehicle, Integer time) {
-		ArrayList<Object> taskAtPosition = taskOrder.getValue(vehicle.id());
+		ArrayList<Object> taskAtPosition= null;
 		Integer previousKey = null;
-		System.out.println("Time in addTaskToList: "+time);
+		System.out.println("Adding task: "+ taskObject);
 
 		if(time > 0) {
-			previousKey = getPreviousKey(createHash(taskObject));
+			previousKey= getHashByTimeAndVehicle(time-1, vehicle);
+			taskAtPosition = taskOrder.getValue(previousKey);
 		} else {
 			previousKey = vehicle.id();
+			taskAtPosition = taskOrder.getValue(vehicle.id());
 		}
-
 		Integer key = createHash(taskObject);
 		taskOrder.addKeyValue(key, taskAtPosition);
-
 		taskOrder.addKeyValue(previousKey, taskObject);
+		System.out.println("current plan:"+ getPlanVehicle(vehicle));
 		updateTimes(taskObject, currentAction.ADD, vehicle);
 		capacities.updateCapacitiesAfterUpdate(vehicle, time, currentAction.ADD, ((Task)taskObject.get(0)).weight);
 	}
