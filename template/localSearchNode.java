@@ -34,8 +34,11 @@ public class localSearchNode {
 		// Change vehicle
 		for(int i = 0; i < vehicleList.size(); i++) {
 			if(i != vehicleId) {
-				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);				
-				neighbours.add(changingVehicle(taskObject, choosenVehicle, vehicleList.get(i)));
+				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);
+				localSearchNode newSolution = changingVehicle(taskObject, choosenVehicle, vehicleList.get(i));
+				if(newSolution != null) {
+					neighbours.add(newSolution);
+				}
 			}
 		}
 		// Change task order
@@ -53,8 +56,11 @@ public class localSearchNode {
 				}
 			}
 		}
-
+	
 		localSearchNode bestNeighbour = localChoice(neighbours);
+		if(bestNeighbour == null) {
+			bestNeighbour = this;
+		}
 		// return best one
 		return bestNeighbour;
 	}
@@ -129,6 +135,7 @@ public class localSearchNode {
 
 		}
 		else{
+			newSolution = null;
 			System.out.println("vehicleA has an empty plan!!");
 		}
 		return newSolution;
@@ -151,7 +158,7 @@ public class localSearchNode {
 
 	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
 		// check time constraint
-
+		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 		
 		Integer taskObjectAHash = createHash(taskObjectA);
 		Integer taskObjectBHash = createHash(taskObjectB);
@@ -160,16 +167,14 @@ public class localSearchNode {
 		Integer timeB = timeArray.getValue(taskObjectBHash);
 
 		if(vehicleArray.getValue(taskObjectAHash) != vehicleArray.getValue(taskObjectBHash)) {
-			return null;
-		}
-
-		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
+			newSolution = null;
+		} else if(checkTimeConstraint(taskObjectA, taskObjectB)) {
 			System.out.println("-------------");
 			System.out.println("TaskObjectA: "+taskObjectA);
 			System.out.println("TaskObjectB: "+taskObjectB);
 			System.out.println("Time A: "+timeA);
 			System.out.println("Time B: "+timeB);
-			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
+			
 			System.out.println("Before changing order: ");
 			System.out.println(newSolution.getPlanVehicle(vehicle));
 			
@@ -189,13 +194,11 @@ public class localSearchNode {
 			System.out.println("------------");
 
 			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
-				return null;
+				newSolution = null;
 			}
-
-			return newSolution;
 		}
 
-		return null;
+		return newSolution;
 	}
 	/**
 	 * check if capacity never drops below zero
@@ -468,7 +471,7 @@ public class localSearchNode {
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
 		localSearchNode bestNode = null;
 		long bestCost = 0;
-
+		
 		for(int i = 0; i < neighbours.size(); i++) {
 			localSearchNode solution = neighbours.get(i);
 			long cost = solution.getCost();
@@ -479,7 +482,7 @@ public class localSearchNode {
 		}
 
 		// Stochastic Hill Climbing
-		if(bestNode.getCost() < this.getCost()) {
+		if(bestNode != null && bestNode.getCost() < this.getCost()) {
 			if(randomChoice()) {
 				return bestNode;
 			} else {

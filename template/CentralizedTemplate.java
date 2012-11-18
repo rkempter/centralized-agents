@@ -44,8 +44,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 
-
-
 		init = new Initialization(tasks, vehicles);
 		System.out.println("Before: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
@@ -56,23 +54,20 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
 		capacityClass cc= init.getCapacities();
+		int iterationNbr = 1000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		node.chooseNeighbours();
+		while(iterationNbr > 0) {
+			node = node.chooseNeighbours();
+			iterationNbr--;
+		}
+		
 		//node.changingVehicle(vehicles.get(0), vehicles.get(1));
 		System.out.println("After: ");
-		System.out.println(init.getPlanVehicle(vehicles.get(0)));
-		System.out.println(init.getPlanVehicle(vehicles.get(1)));
+		for(int i = 0; i < vehicles.size(); i++) {
+			System.out.println(node.getPlanVehicle(vehicles.get(i)));
+		}
 
-
-
-
-		//		System.out.println(nT.getTimeM());
-		//		System.out.println(nT.getVehicleM());
-
-
-
-		//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
 
 		Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
 
