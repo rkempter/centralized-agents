@@ -26,7 +26,7 @@ public class localSearchNode {
 
 	public localSearchNode chooseNeighbours() {
 		Random generator = new Random();
-		int vehicleId = generator.nextInt(vehicleList.size());
+		int vehicleId = 0;//generator.nextInt(vehicleList.size());
 		Vehicle choosenVehicle = vehicleList.get(vehicleId);
 
 		ArrayList<localSearchNode> neighbours = new ArrayList<localSearchNode>();
@@ -91,11 +91,9 @@ public class localSearchNode {
 
 		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
-		// THINK OF HASH COLLISIONS!!!!!!!!!!
-
 		// We put taskObject from vehicle A to vehicle B
-		if(taskOrder.getValue(vehicleA.id())!= null){
-			ArrayList<Object> firstTaskPickUpA = taskOrder.getValue(vehicleA.id());
+		if(newSolution.taskOrder.getValue(vehicleA.id())!= null){
+			ArrayList<Object> firstTaskPickUpA = newSolution.taskOrder.getValue(vehicleA.id());
 			Task task = (Task) firstTaskPickUpA.get(0);
 
 			ArrayList<Object> firstTaskDeliverA = new ArrayList<Object>();
@@ -103,40 +101,32 @@ public class localSearchNode {
 			firstTaskDeliverA.add(actionStates.DELIVER);
 
 			Integer deliverTaskHash = (task.toString() + actionStates.DELIVER).hashCode();
+			
+			//print out the plan before we change vehicles
+			System.out.println("*******************");
+			System.out.println("plan of vehicle before changing "+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
+			System.out.println("plan of vehicle before changing"+vehicleB.id() +" is "+newSolution.getPlanVehicle(vehicleB));
+			newSolution.capacities.printCapacities();
+			System.out.println("Time for tasks of vehicle "+ vehicleA.id()+ " is "+ newSolution.getTimeOfPlan(vehicleA));
+			System.out.println("Time for tasks of vehicle "+ vehicleB.id()+ " is "+ newSolution.getTimeOfPlan(vehicleB));
 
-			removeTaskFromList(deliverTaskHash, vehicleA);
-
-			removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
-
-			capacities.printCapacities();
-
-			System.out.println("@@@@@@@@@@@@@@");
-			//inconsistent State here
-			System.out.println(getPlanVehicle(vehicleA));
-			System.out.println(getPlanVehicle(vehicleB));
-
-			System.out.println("@@@@@@@@@@@@@@");
-			capacities.printCapacities();
-
+			
+			newSolution.removeTaskFromList(deliverTaskHash, vehicleA);
+			newSolution.removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
 
 			// Put delivery task at beginning (time 0)
-			addTaskToList(firstTaskDeliverA, vehicleB, 0);
+			newSolution.addTaskToList(firstTaskDeliverA, vehicleB, 0);
 
 			// Put task at beginning (time 0)
-			addTaskToList(firstTaskPickUpA, vehicleB, 0);
+			newSolution.addTaskToList(firstTaskPickUpA, vehicleB, 0);
+			newSolution.capacities.printCapacities();
+			
+			System.out.println("plan of vehicle after changing"+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
+			System.out.println("plan of vehicle after changing"+vehicleB.id() +" is "+newSolution.getPlanVehicle(vehicleB));
 			capacities.printCapacities();
-
-			//System.out.println()
-
-			System.out.println("@@@@@@@@@@@@@@");
-			//inconsistent State here
-			System.out.println(getPlanVehicle(vehicleA));
-			System.out.println(getPlanVehicle(vehicleB));
-
-			System.out.println("@@@@@@@@@@@@@@");
-
-			//works till here need to update times
-
+			System.out.println("Time for tasks of vehicle "+ vehicleA.id()+ " is "+ newSolution.getTimeOfPlan(vehicleA));
+			System.out.println("Time for tasks of vehicle "+ vehicleB.id()+ " is "+ newSolution.getTimeOfPlan(vehicleB));
+			System.out.println("*******************");
 
 		}
 		else{
@@ -154,8 +144,8 @@ public class localSearchNode {
 
 	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
 		// check time constraint
-		System.out.println("TaskObjectA: "+taskObjectA);
-		System.out.println("TaskObjectB: "+taskObjectB);
+//		System.out.println("TaskObjectA: "+taskObjectA);
+//		System.out.println("TaskObjectB: "+taskObjectB);
 		Integer taskObjectAHash = createHash(taskObjectA);
 		Integer taskObjectBHash = createHash(taskObjectB);
 		Vehicle vehicle = vehicleArray.getValue(taskObjectAHash);
@@ -549,6 +539,19 @@ public class localSearchNode {
 			//}
 		}
 		return vehiclePlan;
+	}
+	public ArrayList<ArrayList<Integer>> getTimeOfPlan(Vehicle v){
+		ArrayList<ArrayList<Integer>> time= new ArrayList<ArrayList<Integer>>();
+		int key= v.id();
+		while(taskOrder.getValue(key)!= null){
+			ArrayList<Object> value= taskOrder.getValue(key);
+			ArrayList<Integer> hashTime = new ArrayList<Integer>();
+			hashTime.add(createHash(value));
+			hashTime.add(timeArray.getValue(createHash(value)));
+			time.add(hashTime);
+			key= createHash(value);
+		}
+		return time;
 	}
 
 }
