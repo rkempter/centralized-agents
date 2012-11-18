@@ -299,22 +299,6 @@ public class localSearchNode {
 		return newHash;
 	}
 
-	private int getPositionByCapacity(Vehicle vehicleB, int taskWeightB) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	private localSearchNode ChangingTaskOrder() {
-		localSearchNode taskOrderNode = null;
-		// Check capacity constraints
-		// Exchange tasks
-		// Adjust following keys
-
-		// Adjust time array
-		// Adjust capacity array
-		return taskOrderNode;
-	}
-
 	/**
 	 * Checks if the time constraints are held given to tasks
 	 * 
