@@ -26,7 +26,7 @@ public class localSearchNode {
 
 	public localSearchNode chooseNeighbours() {
 		Random generator = new Random();
-		int vehicleId = 0;//generator.nextInt(vehicleList.size());
+		int vehicleId = generator.nextInt(vehicleList.size());
 		Vehicle choosenVehicle = vehicleList.get(vehicleId);
 
 		ArrayList<localSearchNode> neighbours = new ArrayList<localSearchNode>();
