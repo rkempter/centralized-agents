@@ -31,14 +31,28 @@ public class Initialization {
 		int t_idx= 0;
 		Vehicle lastVehicle = null;
 		Integer lastKey = null;
+		
+		//random percentage
+		double sum=0;
+		ArrayList<Double> fillPercentage= new ArrayList<Double>();
+		double maxValue= 1/(double)vehicleList.size();
+		double minValue= maxValue/2;
+		for(int i=0; i< vehicleList.size()-1; i++){ 
+			fillPercentage.add(minValue + (Math.random() * (maxValue - minValue)));
+			sum+=fillPercentage.get(i);
+		}
+		fillPercentage.add(1-sum);
+		//System.out.println(fillPercentage);
+		int last_idx=0;
 
 		for(int i=0; i< vehicleList.size(); i++){
 			System.out.println("vehicle:"+ vehicleList.get(i).id());
 			int currentVehicleCapacity= vehicleList.get(i).capacity();
-			
+
 			int time= 0;
-//			int tryShare= 30;
-			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity){	//tryShare
+			last_idx= t_idx;
+
+			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity && ((float)(t_idx-last_idx)/(float)TaskSet.size())<fillPercentage.get(i)){
 				System.out.println("adding task: "+ TaskSet.get(t_idx)+ " to vehicle "+ vehicleList.get(i).id());
 				//adding the entry vehicle in nextT 
 				if(!nT.checkKey(vehicleList.get(i).id())){
