@@ -89,8 +89,6 @@ public class localSearchNode {
 
 		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
-		taskOrder.printState();
-
 		// THINK OF HASH COLLISIONS!!!!!!!!!!
 
 		// We put taskObject from vehicle A to vehicle B

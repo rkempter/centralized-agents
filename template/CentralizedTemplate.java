@@ -58,7 +58,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		capacityClass cc= init.getCapacities();
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		//node.changingVehicle();
+		node.chooseNeighbours();
 		//node.changingVehicle(vehicles.get(0), vehicles.get(1));
 		System.out.println("After: ");
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
