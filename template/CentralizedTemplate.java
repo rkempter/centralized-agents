@@ -58,6 +58,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
 		while(iterationNbr > 0) {
+			System.out.println("*****iteration "+ (1000-iterationNbr));
+
 			node = node.chooseNeighbours();
 			iterationNbr--;
 		}
