@@ -117,7 +117,7 @@ public class localSearchNode {
 			newSolution.addTaskToList(firstTaskDeliverA, vehicleB, 0);
 			// Put task at beginning (time 0)
 			newSolution.addTaskToList(firstTaskPickUpA, vehicleB, 0);
-			updateVehicleArray(createHash(firstTaskDeliverA), createHash(firstTaskPickUpA), vehicleB);
+			newSolution.updateVehicleArray(createHash(firstTaskDeliverA), createHash(firstTaskPickUpA), vehicleB);
 			newSolution.capacities.printCapacities();
 			
 			System.out.println("plan of vehicle after changing"+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
@@ -220,6 +220,7 @@ public class localSearchNode {
 		ArrayList<Object> next = taskOrder.getValue(hash);
 
 		int previousKey = getPreviousKey(hash);
+		System.out.println("ùùùùùùù"+ previousKey+ " "+ taskOrder.getValue(previousKey));
 		ArrayList<Object> currentRemovedTask= taskOrder.getValue(previousKey);
 		taskOrder.addKeyValue(previousKey, next);		//update previous entry
 		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
@@ -319,6 +320,7 @@ public class localSearchNode {
 	private Integer getPreviousKey(Integer hash) {
 		Integer time = timeArray.getValue(hash);
 		Vehicle vehicle = vehicleArray.getValue(hash);		//returns the vehicle where the task is
+		System.out.println(vehicle.id());
 		Integer newHash;
 		if(time > 0) {
 			newHash = getHashByTimeAndVehicle(time-1, vehicle);
