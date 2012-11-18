@@ -6,6 +6,7 @@ import java.util.Random;
 
 import logist.simulation.Vehicle;
 import logist.task.Task;
+import logist.topology.Topology.City;
 
 /**
  * @author lollix89
@@ -456,20 +457,59 @@ public class localSearchNode {
 			}	
 		}
 	}
-
+	
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
-		localSearchNode maxNode = null;
-		// Foreach assignement, calculate:
-		int sum = 0;
-		// For i in nextTask
-		// sum += dist(i, nextTask(i)*cost
+		localSearchNode bestNode = null;
+		long bestCost = 0;
+		
+		for(int i = 0; i < neighbours.size(); i++) {
+			localSearchNode solution = neighbours.get(i);
+			long cost = solution.getCost();
+			
+			if(cost > bestCost) {
+				bestNode = solution;
+			}
+		}
+		
+		return bestNode;
+	}
 
-		// For j in vehicule
-		// sum += dist(j.startPosition, nextTask(j))*cost
-
-		// return best assignement
-
-		return maxNode;
+	public long getCost() {
+		long totalCost = 0;
+				
+		for(int i = 0; i < vehicleList.size(); i++) {
+			Vehicle vehicle = vehicleList.get(i);
+			int vehicleId = vehicle.id();
+			ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);
+			City fromCity = vehicle.getCurrentCity();
+			City toCity = null;
+			int costPerKm = vehicle.costPerKm();
+			
+			while(taskObject != null) {
+				long reward = 0;
+				
+				Task task = (Task) taskObject.get(0);
+				actionStates currentAction = (actionStates) taskObject.get(1);
+				
+				if(currentAction == actionStates.PICKUP) {
+					toCity = task.pickupCity;
+				} else {
+					toCity = task.deliveryCity;
+					reward = task.reward;
+				}
+				
+				totalCost += -fromCity.distanceTo(toCity) * costPerKm + reward;
+				
+				// Get next task
+				Integer hash = createHash(taskObject);
+				taskObject = taskOrder.getValue(hash);
+				fromCity = toCity;
+			}
+			
+			
+		}
+		
+		return totalCost;
 
 		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)
 	}
