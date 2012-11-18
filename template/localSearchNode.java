@@ -19,8 +19,6 @@ public class localSearchNode {
 	private capacityClass capacities;
 
 	private List<Vehicle> vehicleList;
-	private enum currentAction {REMOVE, ADD }
-
 
 	// CapacityArray
 
@@ -39,45 +37,41 @@ public class localSearchNode {
 		// Create capacity array
 	}
 
-	private localSearchNode chooseNeighbours() {
+	public localSearchNode chooseNeighbours() {
 		Random generator = new Random();
 		int vehicleId = generator.nextInt(vehicleList.size());
 		// @Todo check if car!!!
 		Vehicle choosenVehicle = vehicleList.get(vehicleId);
-		
+
 		ArrayList<localSearchNode> neighbours = new ArrayList<localSearchNode>();
 
-		// Change vehicule
+		// Change vehicle
 		for(int i = 0; i < vehicleList.size(); i++) {
-			if(i == vehicleId) {
-				continue;
-			} else {
-				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);
+			if(i != vehicleId) {
+				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);		//get first task
 				// Capacity
-				localSearchNode newSolution = changingVehicle(taskObject, choosenVehicle, vehicleList.get(i));
+				neighbours.add(changingVehicle(taskObject, choosenVehicle, vehicleList.get(i)));
 			}
 		}
-		
-
 		// Change task order
 		int length = getTaskArrayLength(choosenVehicle);
 		for(int i = 0; i < length; i++) {
 			for(int j = i+1; j < length; j++) {
 				ArrayList<Object> taskObjectA = getTaskByTimeAndVehicle(i, choosenVehicle);
 				ArrayList<Object> taskObjectB = getTaskByTimeAndVehicle(j, choosenVehicle);
-				
+
 				localSearchNode newSolution = changeTaskOrder(taskObjectA, taskObjectB);
 				if(newSolution != null) {
 					neighbours.add(newSolution);
 				}
 			}
 		}
-		
+
 		localSearchNode bestNeighbour = localChoice(neighbours);
 		// return best one
 		return bestNeighbour;
 	}
-	
+
 	/**
 	 * Gives you the number of tasks a vehicle is assigned to
 	 * 
@@ -92,7 +86,7 @@ public class localSearchNode {
 			taskObject = taskOrder.getValue(taskHash);
 			count++;
 		}
-		
+
 		return count;
 	}
 
@@ -104,8 +98,16 @@ public class localSearchNode {
 	 * @param taskCar2
 	 * @return
 	 */
+	
 	public localSearchNode changingVehicle(ArrayList<Object> taskObject, Vehicle vehicleA, Vehicle vehicleB) {
-		
+//	public localSearchNode changingVehicle() {
+//
+//		//just for testing
+//		Vehicle vehicleA= vehicleList.get(0);
+//		Vehicle vehicleB= vehicleList.get(1);
+
+
+
 		// Fuck java clone stuff
 		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
@@ -127,9 +129,9 @@ public class localSearchNode {
 			removeTaskFromList(deliverTaskHash, vehicleA);
 
 			removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
-		
+
 			capacities.printCapacities();
-			
+
 			System.out.println("@@@@@@@@@@@@@@");
 			//inconsistent State here
 			System.out.println(getPlanVehicle(vehicleA));
@@ -138,7 +140,7 @@ public class localSearchNode {
 			System.out.println("@@@@@@@@@@@@@@");
 			capacities.printCapacities();
 
-			
+
 			// Put delivery task at beginning (time 0)
 			addTaskToList(firstTaskDeliverA, vehicleB, 0);
 
@@ -162,26 +164,16 @@ public class localSearchNode {
 		else{
 			System.out.println("vehicleA has an empty plan!!");
 		}
-
-		// We have to exchange Pickup and delivery!!!!!!
-
-		// Change exchange tasks at specific keys.
-		// Change key of the following element
-
-		// Change tasks in the vehicule array
-		// Change time of tasks
-
-		// Check capacity constraints
 		return newSolution;
 	}
-	
+
 	/**
 	 * Exchange two tasks
 	 * 
 	 * @param taskObjectA
 	 * @param taskObjectB
 	 */
-	
+
 	private localSearchNode changeTaskOrder(ArrayList<Object> taskObjectA, ArrayList<Object> taskObjectB) {
 		// check time constraint
 		Integer taskObjectAHash = createHash(taskObjectA);
@@ -189,25 +181,25 @@ public class localSearchNode {
 		Vehicle vehicle = vehicleArray.getValue(taskObjectAHash);
 		Integer timeA = timeArray.getValue(taskObjectAHash);
 		Integer timeB = timeArray.getValue(taskObjectBHash);
-		
+
 		if(vehicleArray.getValue(taskObjectAHash) != vehicleArray.getValue(taskObjectBHash)) {
 			return null;
 		}
-		
+
 		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
 			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
 			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
 			newSolution.addTaskToList(taskObjectB, vehicle, timeA);
-			
-//			if(!newSolution.checkOverallCapacity(vehicle)) {
-//				return null;
-//			}
-			
+
+			//			if(!newSolution.checkOverallCapacity(vehicle)) {
+			//				return null;
+			//			}
+
 			return newSolution;
 		}
-		
+
 		return null;
 	}
 
@@ -225,7 +217,7 @@ public class localSearchNode {
 		ArrayList<Object> currentRemovedTask= taskOrder.getValue(previousKey);
 		taskOrder.addKeyValue(previousKey, next);	//update previous entry
 		taskOrder.addKeyValue(hash, null);			//inconsistent need to be updated in addTask
-		
+
 		System.out.println(currentRemovedTask);
 		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
@@ -265,10 +257,10 @@ public class localSearchNode {
 	private Integer createHash(ArrayList<Object> taskObject) {
 		//System.out.println("we want hash of this "+taskObject);
 		if(taskObject!=null){
-		Task task = (Task) taskObject.get(0);
-		actionStates taskAction = (actionStates)taskObject.get(1);
+			Task task = (Task) taskObject.get(0);
+			actionStates taskAction = (actionStates)taskObject.get(1);
 
-		return (task.toString() + taskAction).hashCode();
+			return (task.toString() + taskAction).hashCode();
 		}
 		else
 			return null;
@@ -292,7 +284,7 @@ public class localSearchNode {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * returns the task hash on specified vehicle at the specified time
 	 * 
@@ -345,7 +337,7 @@ public class localSearchNode {
 	private boolean checkCapacity(Integer t, Vehicle v) {
 		return true;
 	}
-	
+
 	/**
 	 * Checks if the time constraints are held given to tasks
 	 * 
@@ -361,7 +353,7 @@ public class localSearchNode {
 		Integer hashBReal = createHash(taskBObject);
 		Integer hashACheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionA));
 		Integer hashBCheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionB));
-		
+
 		if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.DELIVER)) {
 			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) > timeArray.getValue(hashACheck)) {
 				return true;
@@ -379,10 +371,10 @@ public class localSearchNode {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Creates a taskObject based on a task and an action
 	 * 
@@ -394,10 +386,10 @@ public class localSearchNode {
 		ArrayList<Object> taskObject = new ArrayList<Object>();
 		taskObject.add(task);
 		taskObject.add(action);
-		
+
 		return taskObject;
 	}
-	
+
 	/**
 	 * Returns the contrary action
 	 * @param action
@@ -460,7 +452,7 @@ public class localSearchNode {
 				currentTaskTime ++;
 				timeArray.addKeyValue(hashNextTask, currentTaskTime);
 				hashNextTask= createHash(taskOrder.getValue(hashNextTask));
-				
+
 			}	
 		}
 	}
