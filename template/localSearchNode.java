@@ -3,17 +3,11 @@ package template;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import com.rits.cloning.Cloner;
-
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.topology.Topology.City;
 
-/**
- * @author lollix89
- *
- */
+
 public class localSearchNode {
 
 	private nextTask taskOrder;
@@ -21,18 +15,13 @@ public class localSearchNode {
 	private vehicleClass vehicleArray;
 	private capacityClass capacities;
 	private List<Vehicle> vehicleList;
-	
-	private Cloner cloner;
-
 
 	public localSearchNode(nextTask _taskOrder, timeClass _timeArray, vehicleClass _vehicleArray, capacityClass cc, List<Vehicle> _vehicleList) {
-		taskOrder = _taskOrder;
-		timeArray = _timeArray;
-		vehicleArray = _vehicleArray;
-		capacities= cc;
+		taskOrder = new nextTask(_taskOrder.getNextT());
+		timeArray = new timeClass(_timeArray.getTimeM());
+		vehicleArray = new vehicleClass(_vehicleArray.getVehicleM());
+		capacities= new capacityClass(_vehicleList, cc.getCapacities());
 		vehicleList = _vehicleList;
-		
-		cloner = new Cloner();
 	}
 
 	public localSearchNode chooseNeighbours() {
@@ -98,7 +87,7 @@ public class localSearchNode {
 	public localSearchNode changingVehicle(ArrayList<Object> taskObject, Vehicle vehicleA, Vehicle vehicleB) {
 
 
-		localSearchNode newSolution = cloner.deepClone(this);
+		localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 
 		taskOrder.printState();
 
@@ -176,7 +165,7 @@ public class localSearchNode {
 		}
 
 		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
-			localSearchNode newSolution = cloner.deepClone(this);
+			localSearchNode newSolution = new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
 			newSolution.addTaskToList(taskObjectA, vehicle, timeB);
@@ -452,7 +441,7 @@ public class localSearchNode {
 			}	
 		}
 	}
-	
+
 	/**
 	 * Chooses the best neighbour. Uses stochastic hill climbing in case there is no neighbour
 	 * with heigher costs than the current solution.
@@ -463,16 +452,16 @@ public class localSearchNode {
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
 		localSearchNode bestNode = null;
 		long bestCost = 0;
-		
+
 		for(int i = 0; i < neighbours.size(); i++) {
 			localSearchNode solution = neighbours.get(i);
 			long cost = solution.getCost();
-			
+
 			if(cost > bestCost) {
 				bestNode = solution;
 			}
 		}
-		
+
 		// Stochastic Hill Climbing
 		if(bestNode.getCost() < this.getCost()) {
 			if(randomChoice()) {
@@ -481,7 +470,7 @@ public class localSearchNode {
 				return this;
 			}
 		}
-		
+
 		return bestNode;
 	}
 
@@ -494,14 +483,14 @@ public class localSearchNode {
 		Random generator = new Random();
 		int number = generator.nextInt(10) + 1;
 		int threshold = 4; // 0.4 probabilty of changing
-		
+
 		if(number <= threshold) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Computes the cost of the current solution
 	 * 
@@ -509,7 +498,7 @@ public class localSearchNode {
 	 */
 	public long getCost() {
 		long totalCost = 0;
-				
+
 		for(int i = 0; i < vehicleList.size(); i++) {
 			Vehicle vehicle = vehicleList.get(i);
 			int vehicleId = vehicle.id();
@@ -517,31 +506,31 @@ public class localSearchNode {
 			City fromCity = vehicle.getCurrentCity();
 			City toCity = null;
 			int costPerKm = vehicle.costPerKm();
-			
+
 			while(taskObject != null) {
 				long reward = 0;
-				
+
 				Task task = (Task) taskObject.get(0);
 				actionStates currentAction = (actionStates) taskObject.get(1);
-				
+
 				if(currentAction == actionStates.PICKUP) {
 					toCity = task.pickupCity;
 				} else {
 					toCity = task.deliveryCity;
 					reward = task.reward;
 				}
-				
+
 				totalCost += -fromCity.distanceTo(toCity) * costPerKm + reward;
-				
+
 				// Get next task
 				Integer hash = createHash(taskObject);
 				taskObject = taskOrder.getValue(hash);
 				fromCity = toCity;
 			}
-			
-			
+
+
 		}
-		
+
 		return totalCost;
 
 		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)

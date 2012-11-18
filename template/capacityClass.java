@@ -8,6 +8,11 @@ import logist.simulation.Vehicle;
 
 public class capacityClass {
 	private ArrayList<ArrayList<Integer>> capacities;
+	
+	public ArrayList<ArrayList<Integer>> getCapacities() {
+		return capacities;
+	}
+
 	private List<Vehicle> vehicleList;
 
 
@@ -18,6 +23,23 @@ public class capacityClass {
 		}
 		vehicleList= _vehicleList;
 	}
+	
+	public capacityClass(List<Vehicle> _vehicleList, ArrayList<ArrayList<Integer>> _capacities){
+		capacities= new ArrayList<ArrayList<Integer>>(_vehicleList.size());
+		for(int i=0; i< _capacities.size(); i++){
+			capacities.add(new ArrayList<Integer>());
+			for(int j=0; j< _capacities.get(i).size(); j++){
+				Integer newIntObject = new Integer(_capacities.get(i).get(j));
+				capacities.get(i).add(newIntObject);
+			}
+			
+		}
+		
+		
+		
+		vehicleList= _vehicleList;
+	}
+	
 	public void addCapacitySequentially(int vehicleId, int capacity){		//method used only by Initialization
 		capacities.get(vehicleId).add(capacity);
 	}

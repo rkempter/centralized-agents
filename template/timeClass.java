@@ -7,7 +7,17 @@ import java.util.Map;
 public class timeClass {
 	private Map<Integer,Integer> timeM = new HashMap<Integer, Integer>();
 	
+	public Map<Integer, Integer> getTimeM() {
+		return timeM;
+	}
+
 	public timeClass(){
+	}
+	
+	public timeClass(Map<Integer, Integer> map){
+		for(Map.Entry<Integer, Integer> entry : map.entrySet()){
+			timeM.put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	public void addKeyValue(int key, Integer value){

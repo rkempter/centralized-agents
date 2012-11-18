@@ -10,7 +10,18 @@ import java.util.Map;
 public class nextTask {
 	private Map<Object,ArrayList<Object>> nextT = new HashMap<Object, ArrayList<Object>>();
 	
-	public nextTask(){	}
+	public Map<Object, ArrayList<Object>> getNextT() {
+		return nextT;
+	}
+	
+	public nextTask(){ }
+	public nextTask(Map<Object, ArrayList<Object>> map){
+		for(Map.Entry<Object, ArrayList<Object>> entry : map.entrySet()){
+			nextT.put(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	
 	/**
 	 * By converting current Task into a Hashcode and use
 	 * as the key, we find the next task
