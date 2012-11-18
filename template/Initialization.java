@@ -37,8 +37,8 @@ public class Initialization {
 			int currentVehicleCapacity= vehicleList.get(i).capacity();
 			
 			int time= 0;
-
-			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity){	
+//			int tryShare= 30;
+			while (t_idx<TaskSet.size() && TaskSet.get(t_idx).weight<= currentVehicleCapacity){	//tryShare
 				System.out.println("adding task: "+ TaskSet.get(t_idx)+ " to vehicle "+ vehicleList.get(i).id());
 				//adding the entry vehicle in nextT 
 				if(!nT.checkKey(vehicleList.get(i).id())){
@@ -54,6 +54,7 @@ public class Initialization {
 					taskAction.add(actionStates.PICKUP);
 					nT.addKeyValue(lastKey, taskAction);
 				}
+				//tryShare-= TaskSet.get(t_idx).weight;
 				//currentVehicleCapacity-= TaskSet.get(t_idx).weight;
 				for(int j=0; j< actions.length; j++){
 					if(actions[j].equals(actionStates.PICKUP)){

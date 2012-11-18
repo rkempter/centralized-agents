@@ -15,6 +15,8 @@ public class localSearchNode {
 	private vehicleClass vehicleArray;
 	private capacityClass capacities;
 	private List<Vehicle> vehicleList;
+	private double bestCost;
+
 
 	public localSearchNode(nextTask _taskOrder, timeClass _timeArray, vehicleClass _vehicleArray, capacityClass cc, List<Vehicle> _vehicleList) {
 		taskOrder = new nextTask(_taskOrder.getNextT());
@@ -22,6 +24,12 @@ public class localSearchNode {
 		vehicleArray = new vehicleClass(_vehicleArray.getVehicleM());
 		capacities= new capacityClass(_vehicleList, cc.getCapacities());
 		vehicleList = _vehicleList;
+		
+		bestCost =  Double.POSITIVE_INFINITY;
+	}
+
+	public void setBestCost(double bestCost) {
+		this.bestCost = bestCost;
 	}
 
 	public localSearchNode chooseNeighbours() {
@@ -30,13 +38,18 @@ public class localSearchNode {
 		Vehicle choosenVehicle = vehicleList.get(vehicleId);
 
 		ArrayList<localSearchNode> neighbours = new ArrayList<localSearchNode>();
-
 		// Change vehicle
 		for(int i = 0; i < vehicleList.size(); i++) {
 			if(i != vehicleId) {
 				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);
 				localSearchNode newSolution = changingVehicle(taskObject, choosenVehicle, vehicleList.get(i));
 				if(newSolution != null) {
+//					System.out.println("********************************");
+//					System.out.println(vehicleId);
+//					System.out.println("new vehicle id: "+ vehicleList.get(i).id());
+//					System.out.println(newSolution.getPlanVehicle(vehicleList.get(i)));
+//					System.out.println(newSolution.getCost());
+//					System.out.println("********************************");
 					neighbours.add(newSolution);
 				}
 			}
@@ -60,7 +73,11 @@ public class localSearchNode {
 		localSearchNode bestNeighbour = localChoice(neighbours);
 		if(bestNeighbour == null) {
 			bestNeighbour = this;
+			bestNeighbour.setBestCost(bestNeighbour.getCost());
 		}
+		else
+			bestNeighbour.setBestCost(bestNeighbour.getCost());
+
 		// return best one
 		return bestNeighbour;
 	}
@@ -197,7 +214,6 @@ public class localSearchNode {
 				newSolution = null;
 			}
 		}
-
 		return newSolution;
 	}
 	/**
@@ -462,14 +478,13 @@ public class localSearchNode {
 	 */
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
 		localSearchNode bestNode = null;
-		double bestCost =  Double.POSITIVE_INFINITY;
 
 		for(int i = 0; i < neighbours.size(); i++) {
 			localSearchNode solution = neighbours.get(i);
 			double cost = solution.getCost();
 
 			if(cost < bestCost) {
-				System.out.println("Inside with bestCost: "+bestCost+" and the new cost "+cost);
+				System.out.println("Inside with bestCost: "+ bestCost+" and the new cost "+cost);
 				bestNode = solution;
 				bestCost = cost;
 			}

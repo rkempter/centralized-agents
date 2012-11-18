@@ -30,6 +30,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
+	private double bestCost =  Double.POSITIVE_INFINITY;
+
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
@@ -54,7 +56,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
 		capacityClass cc= init.getCapacities();
-		int iterationNbr = 50;
+		int iterationNbr = 1000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
 		
@@ -117,6 +119,54 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		}
 
 	}
+	/**
+	 * Chooses the best neighbour. Uses stochastic hill climbing in case there is no neighbour
+	 * with heigher costs than the current solution.
+	 * 
+	 * @param neighbours
+	 * @return bestNode
+	 */
+	private localSearchNode localChoice(localSearchNode currentNode, ArrayList<localSearchNode> neighbours) {
+		localSearchNode bestNode = null;
+		
+		for(int i = 0; i < neighbours.size(); i++) {
+			localSearchNode solution = neighbours.get(i);
+			double cost = solution.getCost();
+
+			if(cost < bestCost) {
+				System.out.println("Updating bestCost: "+ bestCost +" and the new cost is: "+cost);
+				bestNode = solution;
+				bestCost = cost;
+			}
+		}
+
+		// Stochastic Hill Climbing
+		if(bestNode != null && bestNode.getCost() < currentNode.getCost()) {
+			if(randomChoice()) {
+				System.out.println(bestNode.getCost());
+			} else {
+				System.out.println(currentNode.getCost());
+				bestNode= currentNode;
+			}
+		}
+		return bestNode;
+	}
+
+	/**
+	 * Simulation of stochastic process
+	 * 
+	 * @return true / false
+	 */
+	private boolean randomChoice() {
+		Random generator = new Random();
+		int number = generator.nextInt(10) + 1;
+		int threshold = 9; 			// 0.9 probabilty of changing
+		if(number <= threshold) {
+			return true;
+		}
+		return false;
+	}
+	
 }
 
 
