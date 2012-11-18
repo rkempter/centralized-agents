@@ -59,7 +59,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		int iterationNbr = 1000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		int convergenceCheck= 50;			//if after convergenceCheck the cost doesn't drop, we consider that the algorithm converged.
+		int convergenceCheck = 100;			//if after convergenceCheck the cost doesn't drop, we consider that the algorithm converged.
 		long oldCost= 0;
 		while(iterationNbr > 0 && convergenceCheck> 0) {
 			System.out.println("*****iteration "+ (1000-iterationNbr));
@@ -71,7 +71,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				convergenceCheck--;
 			}
 			else
-				convergenceCheck= 50;		//reset convergence checker;
+				convergenceCheck= 100;		//reset convergence checker;
 			oldCost= node.getCost();
 			for(int i = 0; i < vehicles.size(); i++) {
 				System.out.println(node.getPlanVehicle(vehicles.get(i)));
@@ -85,40 +85,53 @@ public class CentralizedTemplate implements CentralizedBehavior {
 			System.out.println(node.getPlanVehicle(vehicles.get(i)));
 		}
 
-		Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
-
 		List<Plan> plans = new ArrayList<Plan>();
-		plans.add(planVehicle1);
-		while (plans.size() < vehicles.size())
-			plans.add(Plan.EMPTY);
+		
+		for(int i = 0; i < vehicles.size(); i++) {
+			Plan planVehicle = generatePlan(vehicles.get(i), node.getTaskOrder());
+			plans.add(planVehicle);
+		}
 
 		return plans;
 	}
 
-	private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
-		City current = vehicle.getCurrentCity();
+	private Plan generatePlan(Vehicle vehicle, nextTask tasks) {
+		City current = vehicle.getCurrentCity(), toCity = null;
 		Plan plan = new Plan(current);
+		Integer key = vehicle.id();
+		ArrayList<Object> taskObject = tasks.getValue(key);
 
-		for (Task task : tasks) {
-			// move: current city => pickup location
-			for (City city : current.pathTo(task.pickupCity))
-				plan.appendMove(city);
-
-			plan.appendPickup(task);
-
-			// move: pickup location => delivery location
-			for (City city : task.path())
-				plan.appendMove(city);
-
-			plan.appendDelivery(task);
-
-			// set current city
-			current = task.deliveryCity;
+		while(taskObject != null) {
+			Task task = (Task) taskObject.get(0);
+			actionStates action = (actionStates) taskObject.get(1);
+			
+			if(action == actionStates.PICKUP) {
+				toCity = task.pickupCity;
+				if(!current.equals(toCity)) {
+					for(City city : current.pathTo(toCity))
+						plan.appendMove(city);
+				}
+				plan.appendPickup(task);
+			} else if (action == actionStates.DELIVER) {
+				toCity = task.deliveryCity;
+				if(!current.equals(toCity)) {
+					for(City city : current.pathTo(toCity))
+						plan.appendMove(city);
+				}
+				plan.appendDelivery(task);
+			}
+			
+			key = localSearchNode.createHash(taskObject);
+			taskObject = tasks.getValue(key);
+			current = toCity;
 		}
+		
+		System.out.println("Plan: "+plan);
+		
 		return plan;
 	}
 
-	public void generateSTartNode(TaskSet tasks){
+	public void generateStartNode(TaskSet tasks){
 		Iterator<Task> taskIterator= tasks.iterator();
 		while ( taskIterator.hasNext() ){
 			Task t= taskIterator.next() ;

@@ -164,7 +164,7 @@ public class localSearchNode {
 		vehicleArray.addKeyValue(hashFirstTaskPickUpA, newV);
 	}
 
-	private nextTask getTaskOrder() {
+	public nextTask getTaskOrder() {
 		return taskOrder;
 	}
 
@@ -282,7 +282,7 @@ public class localSearchNode {
 	 * @param taskObject
 	 * @return hash
 	 */
-	private Integer createHash(ArrayList<Object> taskObject) {
+	public static Integer createHash(ArrayList<Object> taskObject) {
 		//System.out.println("we want hash of this "+taskObject);
 		if(taskObject!=null){
 			Task task = (Task) taskObject.get(0);
