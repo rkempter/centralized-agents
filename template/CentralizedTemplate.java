@@ -55,21 +55,20 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
 		capacityClass cc= init.getCapacities();
-		int iterationNbr = 1000;
+		int iterationNbr = 2000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		int convergenceCheck = 50;						//if after convergenceCheck steps the cost doesn't drop anymore, we consider that the algorithm converged.
+		int convergenceCheck = 100;						//if after convergenceCheck steps the cost doesn't drop anymore, we consider that the algorithm converged.
 		long oldCost= 0;
-		int treshold= 20;
 		while(iterationNbr > 0 && convergenceCheck> 0) {
-			System.out.println("************ iteration "+ (1000-iterationNbr)+"**************");
+			System.out.println("************ iteration "+ (2000-iterationNbr)+"**************");
 
 			node = node.chooseNeighbours();
-			if((oldCost- node.getCost())< treshold){
+			if((oldCost- node.getCost())==0){
 				convergenceCheck--;
 			}
 			else
-				convergenceCheck= 50;			//reset convergence checker;
+				convergenceCheck= 100;			//reset convergence checker;
 			oldCost= node.getCost();
 //			for(int i = 0; i < vehicles.size(); i++) {
 //				System.out.println(node.getPlanVehicle(vehicles.get(i)));
