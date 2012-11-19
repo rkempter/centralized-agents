@@ -51,7 +51,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		System.out.println(init.getPlanVehicle(vehicles.get(0)));
 		System.out.println(init.getPlanVehicle(vehicles.get(1)));
 
-		System.out.println("*****");
 		nextTask nt = init.getNextTask();
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
@@ -59,23 +58,23 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		int iterationNbr = 1000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		int convergenceCheck = 100;			//if after convergenceCheck the cost doesn't drop, we consider that the algorithm converged.
+		int convergenceCheck = 50;						//if after convergenceCheck steps the cost doesn't drop anymore, we consider that the algorithm converged.
 		long oldCost= 0;
+		int treshold= 20;
 		while(iterationNbr > 0 && convergenceCheck> 0) {
-			System.out.println("*****iteration "+ (1000-iterationNbr));
+			System.out.println("************ iteration "+ (1000-iterationNbr)+"**************");
 
 			node = node.chooseNeighbours();
-			System.out.println("--------------");
-			System.out.println(node.getCost());
-			if((oldCost- node.getCost())==0){
+			if((oldCost- node.getCost())< treshold){
 				convergenceCheck--;
 			}
 			else
-				convergenceCheck= 100;		//reset convergence checker;
+				convergenceCheck= 50;			//reset convergence checker;
 			oldCost= node.getCost();
-			for(int i = 0; i < vehicles.size(); i++) {
-				System.out.println(node.getPlanVehicle(vehicles.get(i)));
-			}
+//			for(int i = 0; i < vehicles.size(); i++) {
+//				System.out.println(node.getPlanVehicle(vehicles.get(i)));
+//			}
+//			System.out.println("Cost of current solution: "+ node.getCost());
 			iterationNbr--;
 		}
 		
@@ -84,6 +83,10 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		for(int i = 0; i < vehicles.size(); i++) {
 			System.out.println(node.getPlanVehicle(vehicles.get(i)));
 		}
+		System.out.println("****************************************************");
+		System.out.println("Cost of current solution: "+ node.getCost(true));
+		System.out.println(node.capacities.getCapacities());
+		System.out.println("****************************************************");
 
 		List<Plan> plans = new ArrayList<Plan>();
 		
@@ -126,7 +129,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 			current = toCity;
 		}
 		
-		System.out.println("Plan: "+plan);
+		//System.out.println("Plan: "+plan);
 		
 		return plan;
 	}

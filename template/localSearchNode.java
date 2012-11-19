@@ -13,7 +13,7 @@ public class localSearchNode {
 	private nextTask taskOrder;
 	private timeClass timeArray;
 	private vehicleClass vehicleArray;
-	private capacityClass capacities;
+	public capacityClass capacities;
 	private List<Vehicle> vehicleList;
 	private double bestCost;
 
@@ -44,7 +44,10 @@ public class localSearchNode {
 				ArrayList<Object> taskObject = taskOrder.getValue(vehicleId);
 				localSearchNode newSolution = changingVehicle(taskObject, choosenVehicle, vehicleList.get(i));
 				if(newSolution != null) {
-					//					System.out.println("********************************");
+//										System.out.println("*************changing vehicle*******************");
+//										System.out.println(newSolution.capacities.getCapacities());
+//										System.out.println("********************************");
+
 					//					System.out.println(vehicleId);
 					//					System.out.println("new vehicle id: "+ vehicleList.get(i).id());
 					//					System.out.println(newSolution.getPlanVehicle(vehicleList.get(i)));
@@ -65,6 +68,9 @@ public class localSearchNode {
 				}
 				localSearchNode newSolution = changeTaskOrder(taskObjectA, taskObjectB);
 				if(newSolution != null) {
+//					System.out.println("*************swap tasks*******************");
+//					System.out.println(newSolution.capacities.getCapacities());
+//					System.out.println("********************************");
 					neighbours.add(newSolution);
 				}
 			}
@@ -144,6 +150,10 @@ public class localSearchNode {
 			// Put task at beginning (time 0)
 			newSolution.addTaskToList(firstTaskPickUpA, vehicleB, 0);
 			newSolution.updateVehicleArray(createHash(firstTaskDeliverA), createHash(firstTaskPickUpA), vehicleB);
+			//this part is usefull only if we randomize time and don t append at the beginning
+			if(!checkOverallCapacity(newSolution, vehicleB)){
+				newSolution= null;
+			}
 
 			//			System.out.println("plan of vehicle after changing"+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
 			//			System.out.println("plan of vehicle after changing"+vehicleB.id() +" is "+newSolution.getPlanVehicle(vehicleB));
@@ -247,7 +257,7 @@ public class localSearchNode {
 		taskOrder.addKeyValue(previousKey, next);		//update previous entry
 		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
 
-		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null);
+		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
 	}
 
@@ -273,7 +283,7 @@ public class localSearchNode {
 		taskOrder.addKeyValue(key, taskAtPosition);
 		taskOrder.addKeyValue(previousKey, taskObject);
 		updateTimes(taskObject, currentAction.ADD, vehicle);
-		capacities.updateCapacitiesAfterUpdate(vehicle, time, currentAction.ADD, ((Task)taskObject.get(0)).weight);
+		capacities.updateCapacitiesAfterUpdate(vehicle, time, currentAction.ADD, ((Task)taskObject.get(0)).weight, ((actionStates)taskObject.get(1)));
 	}
 
 	/**
@@ -335,7 +345,7 @@ public class localSearchNode {
 
 	private Integer getPreviousKey(Integer hash) {
 		Integer time = timeArray.getValue(hash);
-		Vehicle vehicle = vehicleArray.getValue(hash);		//returns the vehicle where the task is
+		Vehicle vehicle = vehicleArray.getValue(hash);	
 		Integer newHash;
 		if(time > 0) {
 			newHash = getHashByTimeAndVehicle(time-1, vehicle);
@@ -482,25 +492,22 @@ public class localSearchNode {
 	 */
 	private localSearchNode localChoice(ArrayList<localSearchNode> neighbours) {
 		localSearchNode bestNode = null;
-
 		for(int i = 0; i < neighbours.size(); i++) {
 			localSearchNode solution = neighbours.get(i);
 			double cost = solution.getCost();
 
 			if(cost < bestCost) {
-				System.out.println("Inside with bestCost: "+ bestCost+" and the new cost "+cost);
+				//System.out.println("Inside with bestCost: "+ bestCost+" and the new cost "+cost);
 				bestNode = solution;
 				bestCost = cost;
 			}
 		}
-		if(bestNode != null){
-			System.out.println("cost of current node is:"+ this.getCost()+ " and cost of best node is: "+ bestNode.getCost());
-		}
-
-		// Stochastic Hill Climbing
-		if(bestNode != null && bestNode.getCost() < this.getCost()) {
+		
+		// Stochastic Hill Climbing. If all the nodes are worse than the current get a neighbour with a probability p or remain with you node
+		if(!neighbours.isEmpty() && bestNode == null) {
 			if(randomChoice()) {
-				return bestNode;
+				int idx= (int)(Math.random()* neighbours.size());
+				return neighbours.get(idx);
 			} else {
 				return this;
 			}
@@ -516,7 +523,7 @@ public class localSearchNode {
 	private boolean randomChoice() {
 		Random generator = new Random();
 		int number = generator.nextInt(10) + 1;
-		int threshold = 6; 				// 0.9 probabilty of changing
+		int threshold = 3 ; 				// 0.9 probabilty of changing
 		if(number <= threshold) {
 			return true;
 		}
@@ -528,9 +535,17 @@ public class localSearchNode {
 	 * 
 	 * @return
 	 */
-	public long getCost() {
+	public long getCost(boolean... real) {
+		boolean realCost;
+		if(real.length==0)
+			realCost= false;
+		else
+			realCost= true;
+        
+		
 		long totalCost = 0;
-
+		int numVehicleWithPlan= 0;
+		
 		for(int i = 0; i < vehicleList.size(); i++) {
 			Vehicle vehicle = vehicleList.get(i);
 			int vehicleId = vehicle.id();
@@ -538,9 +553,10 @@ public class localSearchNode {
 			City fromCity = vehicle.getCurrentCity();
 			City toCity = null;
 			int costPerKm = vehicle.costPerKm();
-
+			boolean planFound= false;
+			
 			while(taskObject != null) {
-
+				planFound= true;
 				Task task = (Task) taskObject.get(0);
 				actionStates currentAction = (actionStates) taskObject.get(1);
 
@@ -557,8 +573,18 @@ public class localSearchNode {
 				taskObject = taskOrder.getValue(hash);
 				fromCity = toCity;
 			}
+			if(planFound==true)
+				numVehicleWithPlan++;
 		}
-
+//		if(realCost==false){
+//		//bias to encourage to share tasks fairly
+//		float maxProb= (float) .2;
+//		float bias= vehicleList.size()+1- numVehicleWithPlan;
+//		float percentage= bias/20;//(maxProb*100*vehicleList.size());
+//		//System.out.println(numVehicleWithPlan+ " percentage "+ percentage+ " final cost "+ (long) ((totalCost*percentage)+ totalCost));
+//		totalCost= (long) ((totalCost*percentage)+ totalCost);
+//		}
+		
 		return totalCost;
 
 		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)

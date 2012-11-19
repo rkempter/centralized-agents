@@ -57,7 +57,7 @@ public class capacityClass {
 			capacities.get(vehicleId).set(time, newCapacity);
 		}
 	}
-	public void updateCapacitiesAfterUpdate(Vehicle v, int time, currentAction action, Integer taskWeight){
+	public void updateCapacitiesAfterUpdate(Vehicle v, int time, currentAction action, Integer taskWeight, actionStates taskAction){
 		if(action.equals(currentAction.REMOVE)){
 			int previousCapacity= 0;
 			if(time==0){
@@ -66,8 +66,10 @@ public class capacityClass {
 			else{
 				previousCapacity= capacities.get(v.id()).get(time-1);
 			}
+			int previousValue= capacities.get(v.id()).get(time);
 			for(int i= time+1; i< capacities.get(v.id()).size(); i++){
-				int newCapacityI= previousCapacity + capacities.get(v.id()).get(i)- capacities.get(v.id()).get(i-1);
+				int newCapacityI= previousCapacity + capacities.get(v.id()).get(i)- previousValue;
+				previousValue= capacities.get(v.id()).get(i);
 				capacities.get(v.id()).set(i, newCapacityI);
 				previousCapacity= newCapacityI;
 			}
@@ -76,17 +78,19 @@ public class capacityClass {
 		else{
 			int previousCapacity= -1;
 			int oldWeight= 0;
-			if(time==0){
+			if(time==0)
 				previousCapacity= v.capacity();
-			}	
-			else{
+			else
 				previousCapacity= capacities.get(v.id()).get(time-1);
-			}
-			capacities.get(v.id()).add(time, previousCapacity- taskWeight);
+			if(taskAction.equals(actionStates.PICKUP))
+				capacities.get(v.id()).add(time, previousCapacity- taskWeight);
+			else
+				capacities.get(v.id()).add(time, previousCapacity+ taskWeight);
+
 			for(int i= time+1; i< capacities.get(v.id()).size(); i++){
 				oldWeight= capacities.get(v.id()).get(i)- previousCapacity;
 				previousCapacity= capacities.get(v.id()).get(i);
-				capacities.get(v.id()).set(i, capacities.get(v.id()).get(i-1)-oldWeight);
+				capacities.get(v.id()).set(i, capacities.get(v.id()).get(i-1)+oldWeight);
 			}
 		}
 	}
