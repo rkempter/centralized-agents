@@ -15,6 +15,10 @@ public class localSearchNode {
 	private vehicleClass vehicleArray;
 	public capacityClass capacities;
 	private List<Vehicle> vehicleList;
+
+	private static boolean bias= true;
+	private static boolean randPickUp= true;
+
 	public localSearchNode(nextTask _taskOrder, timeClass _timeArray, vehicleClass _vehicleArray, capacityClass cc, List<Vehicle> _vehicleList) {
 		taskOrder = new nextTask(_taskOrder.getNextT());
 		timeArray = new timeClass(_timeArray.getTimeM());
@@ -41,11 +45,6 @@ public class localSearchNode {
 				localSearchNode newSolution = changingVehicle(taskObject, choosenVehicle, vehicleList.get(i));
 
 				if(newSolution != null) {
-					//					System.out.println(vehicleId);
-					//					System.out.println("new vehicle id: "+ vehicleList.get(i).id());
-					//					System.out.println(newSolution.getPlanVehicle(vehicleList.get(i)));
-					//					System.out.println(newSolution.getCost());
-					//					System.out.println("********************************");
 					neighbours.add(newSolution);
 				}
 			}
@@ -65,14 +64,10 @@ public class localSearchNode {
 				}
 			}
 		}
-
-
 		localSearchNode bestNeighbour = localChoice(neighbours);
 		if(bestNeighbour==null){
 			bestNeighbour= this;
 		}
-
-		// return best node
 		return bestNeighbour;
 	}
 
@@ -90,7 +85,6 @@ public class localSearchNode {
 			taskObject = taskOrder.getValue(taskHash);
 			count++;
 		}
-
 		return count;
 	}
 
@@ -104,10 +98,7 @@ public class localSearchNode {
 	 */
 
 	public localSearchNode changingVehicle(ArrayList<Object> taskObject, Vehicle vehicleA, Vehicle vehicleB) {
-
 		localSearchNode newSolution = null;
-
-		// We put taskObject from vehicle A to vehicle B
 		if(this.getTaskOrder().getValue(vehicleA.id())!= null){
 			newSolution= new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 			ArrayList<Object> firstTaskPickUpA = newSolution.getTaskOrder().getValue(vehicleA.id());
@@ -118,15 +109,6 @@ public class localSearchNode {
 			firstTaskDeliverA.add(actionStates.DELIVER);
 
 			Integer deliverTaskHash = (task.toString() + actionStates.DELIVER).hashCode();
-
-			//print out the plan before we change vehicles
-			//			System.out.println("*******************");
-			//			System.out.println("plan of vehicle before changing "+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
-			//			System.out.println("plan of vehicle before changing"+vehicleB.id() +" is "+newSolution.getPlanVehicle(vehicleB));
-			//			newSolution.capacities.printCapacities();
-			//			System.out.println("Time for tasks of vehicle "+ vehicleA.id()+ " is "+ newSolution.getTimeOfPlan(vehicleA));
-			//			System.out.println("Time for tasks of vehicle "+ vehicleB.id()+ " is "+ newSolution.getTimeOfPlan(vehicleB));
-
 			newSolution.removeTaskFromList(deliverTaskHash, vehicleA);
 			newSolution.removeTaskFromList(createHash(firstTaskPickUpA), vehicleA);
 
@@ -140,17 +122,9 @@ public class localSearchNode {
 			newSolution.addTaskToList(firstTaskPickUpA, vehicleB, 0);
 			newSolution.updateVehicleArray(createHash(firstTaskDeliverA), createHash(firstTaskPickUpA), vehicleB);
 			newSolution.setBestCost(newSolution.getCost());
-			//this part is usefull only if we randomize time and don t append at the beginning
 			if(!checkOverallCapacity(newSolution, vehicleB)){
 				newSolution= null;
 			}
-			//			System.out.println("plan of vehicle after changing"+vehicleA.id() +" is "+newSolution.getPlanVehicle(vehicleA));
-			//			System.out.println("plan of vehicle after changing"+vehicleB.id() +" is "+newSolution.getPlanVehicle(vehicleB));
-			//			newSolution.capacities.printCapacities();
-			//			System.out.println("Time for tasks of vehicle "+ vehicleA.id()+ " is "+ newSolution.getTimeOfPlan(vehicleA));
-			//			System.out.println("Time for tasks of vehicle "+ vehicleB.id()+ " is "+ newSolution.getTimeOfPlan(vehicleB));
-			//			System.out.println("*******************");
-
 		}
 		else{
 			newSolution = null;
@@ -188,16 +162,6 @@ public class localSearchNode {
 			newSolution = null;
 		} 
 		if(checkTimeConstraint(taskObjectA, taskObjectB)) {
-			//			System.out.println("-------------");
-			//			System.out.println("TaskObjectA: "+taskObjectA);
-			//			System.out.println("TaskObjectB: "+taskObjectB);
-			//			System.out.println("Time A: "+timeA);
-			//			System.out.println("Time B: "+timeB);
-			//
-			//			System.out.println("Before changing order: ");
-			//			System.out.println(newSolution.getPlanVehicle(vehicle));
-			//			System.out.println("Time for tasks of vehicle "+ vehicle.id()+ " is "+ newSolution.getTimeOfPlan(vehicle));
-
 			newSolution= new localSearchNode(taskOrder, timeArray, vehicleArray, capacities, vehicleList);
 			newSolution.removeTaskFromList(taskObjectAHash, vehicle);
 			newSolution.removeTaskFromList(taskObjectBHash, vehicle);
@@ -210,11 +174,6 @@ public class localSearchNode {
 				newSolution.addTaskToList(taskObjectA, vehicle, timeB);
 			}
 			newSolution.setBestCost(newSolution.getCost());
-			//			System.out.println("After changing order: ");
-			//			System.out.println(newSolution.getPlanVehicle(vehicle));
-			//			System.out.println("Time for tasks of vehicle "+ vehicle.id()+ " is "+ newSolution.getTimeOfPlan(vehicle));
-			//			System.out.println("------------");
-
 			if(!newSolution.checkOverallCapacity(newSolution, vehicle)) {
 				newSolution = null;
 			}
@@ -234,7 +193,7 @@ public class localSearchNode {
 	}
 
 	/**
-	 * Removes a taskObject from a vehicle and updates the keys
+	 * Removes a taskObject from a vehicle and updates the keys. The removed element has as successor null (illegal value)
 	 * 
 	 * @param hash
 	 * @param vehicle
@@ -245,8 +204,8 @@ public class localSearchNode {
 
 		int previousKey = getPreviousKey(hash);
 		ArrayList<Object> currentRemovedTask= taskOrder.getValue(previousKey);
-		taskOrder.addKeyValue(previousKey, next);		//update previous entry
-		taskOrder.addKeyValue(hash, null);				//inconsistent need to be updated in addTask
+		taskOrder.addKeyValue(previousKey, next);		
+		taskOrder.addKeyValue(hash, null);	
 
 		capacities.updateCapacitiesAfterUpdate(vehicle, timeArray.getValue(createHash(currentRemovedTask)), currentAction.REMOVE, null, null);
 		updateTimes(currentRemovedTask, currentAction.REMOVE, vehicle);
@@ -284,7 +243,6 @@ public class localSearchNode {
 	 * @return hash
 	 */
 	public static Integer createHash(ArrayList<Object> taskObject) {
-		//System.out.println("we want hash of this "+taskObject);
 		if(taskObject!=null){
 			Task task = (Task) taskObject.get(0);
 			actionStates taskAction = (actionStates)taskObject.get(1);
@@ -365,10 +323,6 @@ public class localSearchNode {
 		Integer hashBReal = createHash(taskBObject);
 		Integer hashACheck = createHash(createTaskObject((Task) taskAObject.get(0), complementActionA));
 		Integer hashBCheck = createHash(createTaskObject((Task) taskBObject.get(0), complementActionB));
-		//		System.out.println("Time A Real: "+timeArray.getValue(hashAReal)+" "+taskAObject.get(1));
-		//		System.out.println("Time B Real: "+timeArray.getValue(hashBReal)+" "+taskBObject.get(1));
-		//		System.out.println("Time A Checker: "+timeArray.getValue(hashACheck)+" "+complementActionA);
-		//		System.out.println("Time B Checker: "+timeArray.getValue(hashBCheck)+" "+complementActionB);
 
 		if(taskAObject.get(1).equals(actionStates.PICKUP) && taskBObject.get(1).equals(actionStates.DELIVER)) {
 			if(timeArray.getValue(hashBCheck) < timeArray.getValue(hashAReal) && timeArray.getValue(hashBReal) < timeArray.getValue(hashACheck)) {
@@ -388,7 +342,6 @@ public class localSearchNode {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -421,7 +374,7 @@ public class localSearchNode {
 	}
 
 	/**
-	 * update time for remove and add . AAA: in remove set temporarily the time of the removed element to -1 (illegal value)
+	 * update time for remove and add . Set temporarily the time of the removed element to -1 (illegal value)
 	 * 
 	 * @param currentTask
 	 * @param action
@@ -429,10 +382,10 @@ public class localSearchNode {
 	 */
 	private void updateTimes(ArrayList<Object> currentTask, currentAction action, Vehicle v){
 		if(action.equals(currentAction.REMOVE)){
-			//this part will be useful only if we decide to remove a task not from the top but from a random position
+			//this part will be useful only if remove a task not from the top but from a random position
 			int key= createHash(currentTask);
 			int currentTaskTime= timeArray.getValue(key);
-			timeArray.addKeyValue(key, -1);					//setting to illegal value
+			timeArray.addKeyValue(key, -1);					
 			Integer hashNextTask= getHashByTimeAndVehicle(currentTaskTime+1 , v);
 			//
 			while(hashNextTask!=null){
@@ -442,7 +395,7 @@ public class localSearchNode {
 			}	
 		}
 		else{
-			//this part will be useful only if we decide to append the task to a random position
+			//this part will be useful only to append the task to a random position
 			Integer key= v.id();
 			ArrayList<Object> currentValue= taskOrder.getValue(key);
 			boolean foundPrevious= false;
@@ -456,13 +409,11 @@ public class localSearchNode {
 					foundPrevious= true;
 				}
 				else{
-					key= createHash(currentValue);		//key should be !=NULL otherwise something went wrong
+					key= createHash(currentValue);		
 					currentValue= taskOrder.getValue(key);
 				}
 			}
-			//
 			Integer hashNextTask= createHash(currentTask);
-
 			while(hashNextTask!=null){
 				//update time
 				currentTaskTime ++;
@@ -507,10 +458,12 @@ public class localSearchNode {
 		// and commenting out the first two lines inside the if)
 		if(!neighbours.isEmpty() && bestNode == null) {
 			if(randomChoice()) {
-				int idx= (int)(Math.random()* neighbours.size());
-				return neighbours.get(idx);
-				//				System.out.println("cost best neighbour: "+ bestNeighbour.getCost());
-				//				return bestNeighbour;
+				if(randPickUp){
+					int idx= (int)(Math.random()* neighbours.size());
+					return neighbours.get(idx);
+				}
+				else
+					return bestNeighbour;
 			} else {
 				return this;
 			}
@@ -535,6 +488,7 @@ public class localSearchNode {
 
 	/**
 	 * Computes the cost of the current solution
+	 * cost is equal to: Sum over all vehicles( (every vehicle to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)
 	 * 
 	 * @return
 	 */
@@ -579,19 +533,16 @@ public class localSearchNode {
 			if(planFound==true)
 				numVehicleWithPlan++;
 		}
-		//bias to encourage to share tasks fairly uncomment following lines to use bias
+		//bias to encourage to share tasks fairly
 
-//		if(realCost==false){
-//			float maxProb= (float) .5;
-//			float bias= vehicleList.size()+1- numVehicleWithPlan;
-//			float percentage= (float) (Math.exp(bias)/Math.exp(vehicleList.size()))* maxProb;
-//			//System.out.println( percentage +"with plan "+numVehicleWithPlan+ " percentage "+ percentage+ " final cost "+ (long) ((totalCost*percentage)+ totalCost));
-//			totalCost= (long) ((totalCost* percentage)+ totalCost);
-//		}
-
+		if(realCost==false && bias==true){
+			float maxProb= (float) .6;
+			float bias= vehicleList.size()+1- numVehicleWithPlan;
+			float percentage= (float) (Math.exp(bias)/Math.exp(vehicleList.size()))* maxProb;
+			totalCost= (long) ((totalCost* percentage)+ totalCost);
+		}
 		return totalCost;
 
-		//cost is equal to: Sum over all vehicules( (every vehicule to first task (pickup)) * cost) + Sum over all tasks(dist((task i, action), nextTask(task i, action)*cost)
 	}
 
 	public ArrayList<ArrayList<Object>> getPlanVehicle(Vehicle v){
@@ -599,13 +550,12 @@ public class localSearchNode {
 		int key= v.id();
 
 		while(taskOrder.getValue(key)!= null){
-			//if(((actionStates)nT.getValue(key).get(1)).equals(actionStates.PICKUP)){		//in the plan just need to save one of the two action. It matters the task
 			vehiclePlan.add(taskOrder.getValue(key));
 			key= (taskOrder.getValue(key).get(0).toString()+ (actionStates)taskOrder.getValue(key).get(1)).hashCode();
-			//}
 		}
 		return vehiclePlan;
 	}
+	//debug function
 	public ArrayList<ArrayList<Integer>> getTimeOfPlan(Vehicle v){
 		ArrayList<ArrayList<Integer>> time= new ArrayList<ArrayList<Integer>>();
 		int key= v.id();

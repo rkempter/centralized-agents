@@ -13,15 +13,11 @@ public class capacityClass {
 		return capacities;
 	}
 
-	private List<Vehicle> vehicleList;
-
-
 	public capacityClass(List<Vehicle> _vehicleList){
 		capacities= new ArrayList<ArrayList<Integer>>(_vehicleList.size());
 		for(int i=0; i< _vehicleList.size(); i++){
 			capacities.add(new ArrayList<Integer>());
 		}
-		vehicleList= _vehicleList;
 	}
 	
 	public capacityClass(List<Vehicle> _vehicleList, ArrayList<ArrayList<Integer>> _capacities){
@@ -34,10 +30,6 @@ public class capacityClass {
 			}
 			
 		}
-		
-		
-		
-		vehicleList= _vehicleList;
 	}
 	
 	public void addCapacitySequentially(int vehicleId, int capacity){		//method used only by Initialization
@@ -47,7 +39,7 @@ public class capacityClass {
 		if(capacities.get(vehicleId).size()>= time){
 			return capacities.get(vehicleId).get(time);
 		}
-		else{		//should never return this
+		else{				//should never return this
 			return null;
 		}
 	}

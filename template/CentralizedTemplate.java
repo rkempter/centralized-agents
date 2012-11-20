@@ -47,21 +47,25 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 
 		init = new Initialization(tasks, vehicles);
-		System.out.println("Before: ");
-		System.out.println(init.getPlanVehicle(vehicles.get(0)));
-		System.out.println(init.getPlanVehicle(vehicles.get(1)));
-
 		nextTask nt = init.getNextTask();
 		timeClass tc = init.getTimeArray();
 		vehicleClass vc = init.getVehicleArray();
 		capacityClass cc= init.getCapacities();
-		int iterationNbr = 2000;
+		int iterationNbr = 3000;
 
 		localSearchNode node = new localSearchNode(nt, tc, vc, cc, vehicles);
-		int convergenceCheck = 100;						//if after convergenceCheck steps the cost doesn't drop anymore, we consider that the algorithm converged.
+		System.out.println("****************************************************");
+		System.out.println("Initial solution: ");
+		for(int i = 0; i < vehicles.size(); i++) {
+			System.out.println(node.getPlanVehicle(vehicles.get(i)));	
+		}
+		System.out.println("Cost of current solution: "+ node.getCost(true));
+		System.out.println("****************************************************");
+
+		int convergenceCheck = 50;						//if after convergenceCheck steps the cost doesn't drop anymore, we consider that the algorithm converged.
 		long oldCost= 0;
 		while(iterationNbr > 0 && convergenceCheck> 0) {
-			System.out.println("************ iteration "+ (2000-iterationNbr)+"**************");
+			System.out.println("---------> Iteration "+ (3000-iterationNbr));
 
 			node = node.chooseNeighbours();
 			if((oldCost- node.getCost())==0){
@@ -70,21 +74,14 @@ public class CentralizedTemplate implements CentralizedBehavior {
 			else
 				convergenceCheck= 100;			//reset convergence checker;
 			oldCost= node.getCost();
-//			for(int i = 0; i < vehicles.size(); i++) {
-//				System.out.println(node.getPlanVehicle(vehicles.get(i)));
-//			}
-//			System.out.println("Cost of current solution: "+ node.getCost());
 			iterationNbr--;
 		}
-		
-		//node.changingVehicle(vehicles.get(0), vehicles.get(1));
-		System.out.println("After: ");
+		System.out.println("****************************************************");
+		System.out.println("Final solution: ");
 		for(int i = 0; i < vehicles.size(); i++) {
 			System.out.println(node.getPlanVehicle(vehicles.get(i)));
 		}
-		System.out.println("****************************************************");
 		System.out.println("Cost of current solution: "+ node.getCost(true));
-		System.out.println(node.capacities.getCapacities());
 		System.out.println("****************************************************");
 
 		List<Plan> plans = new ArrayList<Plan>();
