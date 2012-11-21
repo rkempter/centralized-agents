@@ -7,10 +7,6 @@ import java.util.Map;
 public class timeClass {
 	private Map<Integer,Integer> timeM = new HashMap<Integer, Integer>();
 	
-	public Map<Integer, Integer> getTimeM() {
-		return timeM;
-	}
-
 	public timeClass(){
 	}
 	
@@ -20,16 +16,26 @@ public class timeClass {
 		}
 	}
 
+	/**
+	 * Method adds or updates a key, value pair.
+	 * @param key
+	 * @param value
+	 */
 	public void addKeyValue(int key, Integer value){
 		timeM.put(key, value);
 	}
 	
+	/**
+	 * Returns the time of a taskObject (taskObject expressed as hash)
+	 * @param key
+	 * @return
+	 */
 	public Integer getValue(int key){
 		return timeM.get(key);
 	}
 	
 	/**
-	 * @TODO Returns tasks for a specific time
+	 * Returns the list of tasks providing a time
 	 * 
 	 * @param time
 	 * @return tasks
@@ -42,5 +48,14 @@ public class timeClass {
 			}
 		}
 		return keys;
+	}
+	
+	/**
+	 * Getter method for timeM Map
+	 * 
+	 * @return
+	 */
+	public Map<Integer, Integer> getTimeM() {
+		return timeM;
 	}
 }

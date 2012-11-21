@@ -32,20 +32,26 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	private Agent agent;
 	private double bestCost =  Double.POSITIVE_INFINITY;
 
-
-	@Override
+	/**
+	 * Setup method
+	 */
 	public void setup(Topology topology, TaskDistribution distribution,
 			Agent agent) {
 
 		this.topology = topology;
 		this.distribution = distribution;
-		this.agent = agent;		
-
+		this.agent = agent;
 	}
 
-	@Override
+	/**
+	 * Method looks for the best solution using the local search algorithm and 
+	 * creates plan for each vehicle.
+	 * 
+	 * @param List<Vehicle>
+	 * @param TaskSet
+	 * @return List<Plan>
+	 */
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-
 		init = new Initialization(tasks, vehicles);
 		nextTask nt = init.getNextTask();
 		timeClass tc = init.getTimeArray();
@@ -94,6 +100,13 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		return plans;
 	}
 
+	/**
+	 * Generates the plan for a vehicle, providing the set of tasks
+	 * 
+	 * @param vehicle
+	 * @param tasks
+	 * @return
+	 */
 	private Plan generatePlan(Vehicle vehicle, nextTask tasks) {
 		City current = vehicle.getCurrentCity(), toCity = null;
 		Plan plan = new Plan(current);
@@ -119,25 +132,14 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				}
 				plan.appendDelivery(task);
 			}
-			
 			key = localSearchNode.createHash(taskObject);
 			taskObject = tasks.getValue(key);
 			current = toCity;
 		}
 		
-		//System.out.println("Plan: "+plan);
-		
 		return plan;
 	}
 
-	public void generateStartNode(TaskSet tasks){
-		Iterator<Task> taskIterator= tasks.iterator();
-		while ( taskIterator.hasNext() ){
-			Task t= taskIterator.next() ;
-			System.out.println( t );
-		}
-
-	}
 	/**
 	 * Chooses the best neighbour. Uses stochastic hill climbing in case there is no neighbour
 	 * with heigher costs than the current solution.
